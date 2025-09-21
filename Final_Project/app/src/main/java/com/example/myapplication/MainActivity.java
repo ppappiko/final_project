@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -15,6 +16,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.example.myapplication.RecentExamAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
         btnSearch    = findViewById(R.id.btnSearch);
         btnBell      = findViewById(R.id.btnBell);
 
-        // ✅ RecentExamAdapter.ExamItem 로 참조
         List<RecentExamAdapter.ExamItem> data = Arrays.asList(
                 new RecentExamAdapter.ExamItem("프로젝트실무2", "2025.07.10", "10문제"),
                 new RecentExamAdapter.ExamItem("프로젝트실무1", "2025.07.10", "30문제")
@@ -51,8 +53,11 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "검색 클릭", Toast.LENGTH_SHORT).show());
         btnBell.setOnClickListener(v ->
                 Toast.makeText(this, "알림 클릭", Toast.LENGTH_SHORT).show());
-        btnNewRecord.setOnClickListener(v ->
-                Toast.makeText(this, "+ 새로운 녹음 클릭", Toast.LENGTH_SHORT).show());
+
+        btnNewRecord.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, RecordingActivity.class);
+            startActivity(intent);
+        });
 
         bottomNav.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
             @Override public boolean onNavigationItemSelected(@NonNull MenuItem item) {
