@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    tools:context=".RecordingActivity">
+
+    <!--가운데 마이크 이미지-->
+    <ImageButton
+        android:id="@+id/btnRecordMic"
+        android:layout_width="144dp"
+        android:layout_height="144dp"
+        android:background="@drawable/new_record_button"
+        android:contentDescription="녹음 버튼"
+        android:src="@drawable/microphone"
+        android:scaleType="centerInside"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/tvTimer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <!--녹음 종료-->
+    <TextView
+        android:id="@+id/tvTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="00:00:00"
+        android:textColor="#000000"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/btnPauseResume"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnRecordMic" />
+
+    <!--일시정지(누르면 재생으로 바뀌어야함)-->
+    <ImageButton
+        android:id="@+id/btnPauseResume"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="일시정지/재생 버튼"
+        android:src="@drawable/pause"
+        app:layout_constraintBottom_toTopOf="@+id/btnStopRecord"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTimer" />
+
+    <!--녹음 종료-->
+    <Button
+        android:id="@+id/btnStopRecord"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="64dp"
+        android:layout_marginTop="24dp"
+        android:text="녹음 종료"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:background="@drawable/new_record_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnPauseResume" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
