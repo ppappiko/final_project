@@ -12,7 +12,7 @@ import java.util.List;
 
 public class RecentExamAdapter extends RecyclerView.Adapter<RecentExamAdapter.ViewHolder> {
 
-    // ✅ 여기로 이동: 데이터 모델을 어댑터 내부 static 클래스로 정의
+    // 아이템 데이터 모델 (제목 = 파일명, date = 수정시각, countLabel = 설명)
     public static class ExamItem {
         private final String title;
         private final String date;
@@ -23,13 +23,14 @@ public class RecentExamAdapter extends RecyclerView.Adapter<RecentExamAdapter.Vi
             this.date = date;
             this.countLabel = countLabel;
         }
+
         public String getTitle() { return title; }
         public String getDate() { return date; }
         public String getCountLabel() { return countLabel; }
     }
 
     public interface OnItemClickListener {
-        void onItemClick(ExamItem item);
+        void onItemClick(ExamItem item, int position);
     }
 
     private final List<ExamItem> items;
@@ -44,14 +45,14 @@ public class RecentExamAdapter extends RecyclerView.Adapter<RecentExamAdapter.Vi
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecentExamAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.file_list, parent, false);
+                .inflate(R.layout.file_list, parent, false); // ← item 레이아웃: file_list.xml
         return new ViewHolder(v, listener, items);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecentExamAdapter.ViewHolder holder, int position) {
         holder.bind(items.get(position));
     }
 
@@ -85,14 +86,16 @@ public class RecentExamAdapter extends RecyclerView.Adapter<RecentExamAdapter.Vi
 
         void bind(@NonNull ExamItem item) {
             tvTitle.setText(item.getTitle());
+            // 예: "2025.09.24 22:10   녹음 파일"
             tvSub.setText(item.getDate() + "   " + item.getCountLabel());
         }
 
         @Override
         public void onClick(View v) {
-            int pos = getBindingAdapterPosition();
+            // 구버전 호환 위해 getAdapterPosition() 사용
+            int pos = getAdapterPosition();
             if (pos != RecyclerView.NO_POSITION) {
-                listener.onItemClick(items.get(pos));
+                listener.onItemClick(items.get(pos), pos);
             }
         }
     }
