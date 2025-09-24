@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.content.Intent;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -51,8 +52,12 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "검색 클릭", Toast.LENGTH_SHORT).show());
         btnBell.setOnClickListener(v ->
                 Toast.makeText(this, "알림 클릭", Toast.LENGTH_SHORT).show());
-        btnNewRecord.setOnClickListener(v ->
-                Toast.makeText(this, "+ 새로운 녹음 클릭", Toast.LENGTH_SHORT).show());
+
+        // 이 부분이 수정된 코드입니다.
+        btnNewRecord.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RecordingActivity.class);
+            startActivity(intent);
+        });
 
         bottomNav.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
             @Override public boolean onNavigationItemSelected(@NonNull MenuItem item) {
