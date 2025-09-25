@@ -4,68 +4,128 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    tools:context=".RecordingActivity">
 
-    <!--가운데 마이크 이미지-->
-    <ImageButton
-        android:id="@+id/btnRecordMic"
-        android:layout_width="144dp"
-        android:layout_height="144dp"
-        android:background="@drawable/new_record_button"
-        android:contentDescription="녹음 버튼"
-        android:src="@drawable/microphone"
-        android:scaleType="centerInside"
-        android:tint="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/tvTimer"
+    android:background="#F4F5F7">
+
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!--녹음 종료-->
-    <TextView
-        android:id="@+id/tvTimer"
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/logo" />
+
+        <TextView
+            android:id="@+id/appName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="LectureNote"
+            android:textColor="#1E1E1E"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnSearch"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="Search"
+            android:src="@drawable/search" />
+
+        <ImageView
+            android:id="@+id/btnBell"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Alert"
+            android:src="@drawable/alert" />
+    </LinearLayout>
+
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="00:00:00"
-        android:textColor="#000000"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/btnPauseResume"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnRecordMic" />
-
-    <!--일시정지(누르면 재생으로 바뀌어야함)-->
-    <ImageButton
-        android:id="@+id/btnPauseResume"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="24dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="일시정지/재생 버튼"
-        android:src="@drawable/pause"
-        app:layout_constraintBottom_toTopOf="@+id/btnStopRecord"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTimer" />
+        app:layout_constraintBottom_toTopOf="@+id/bottomNav">
 
-    <!--녹음 종료-->
-    <Button
-        android:id="@+id/btnStopRecord"
+        <View
+            android:id="@+id/circleBackground"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/circle_background"
+            android:backgroundTint="#20C997" />
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignStart="@id/circleBackground"
+            android:layout_alignTop="@id/circleBackground"
+            android:layout_alignEnd="@id/circleBackground"
+            android:layout_alignBottom="@id/circleBackground"
+            android:src="@drawable/mic_icon"
+            android:contentDescription="Microphone" />
+
+        <TextView
+            android:id="@+id/tv_record_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/circleBackground"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"
+            android:text="00:00:00"
+            android:textColor="#222222"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btn_pause_resume"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_below="@id/tv_record_time"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_pause"
+            android:contentDescription="Pause/Resume" />
+
+        <Button
+            android:id="@+id/btn_stop_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_pause_resume"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/new_record_button"
+            android:text="녹음 종료"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginHorizontal="64dp"
-        android:layout_marginTop="24dp"
-        android:text="녹음 종료"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:background="@drawable/new_record_button"
+        android:layout_height="64dp"
+        android:background="#FFFFFF"
+        app:itemIconTint="@color/bottom_menu_color"
+        app:itemTextColor="@color/bottom_menu_color"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnPauseResume" />
+        app:menu="@menu/bottom_menu" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
