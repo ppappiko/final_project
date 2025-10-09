@@ -1,0 +1,39 @@
+package com.example.myapplication.question;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.example.myapplication.R;
+
+public class QuizResultFragment extends Fragment {
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_quiz_result, container, false);
+
+        Button btnRetry = view.findViewById(R.id.btn_retry);
+        Button btnViewAnswers = view.findViewById(R.id.btn_view_answers);
+
+        btnRetry.setOnClickListener(v -> {
+            // '다시 풀어보기' 클릭 시 문제 풀이 화면으로 돌아감
+            if (getActivity() instanceof QuizActivity) {
+                ((QuizActivity) getActivity()).showQuestionScreen();
+            }
+        });
+
+        btnViewAnswers.setOnClickListener(v -> {
+            // '정답 보기' 클릭 시 (임시로 토스트 메시지)
+            Toast.makeText(getContext(), "정답 보기 기능 준비중", Toast.LENGTH_SHORT).show();
+        });
+
+        return view;
+    }
+}

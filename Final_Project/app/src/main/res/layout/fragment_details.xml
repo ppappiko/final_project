@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tv_detail_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="프로젝트실무2"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"/>
+
+    <TextView
+        android:id="@+id/tv_detail_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2025.07.10"
+        android:layout_marginTop="4dp"/>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:tabIndicatorFullWidth="true"
+        app:tabIndicatorColor="@android:color/black"
+        app:tabSelectedTextColor="@android:color/black"
+        app:tabTextColor="#888888"/>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>
