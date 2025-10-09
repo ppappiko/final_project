@@ -104,8 +104,8 @@ public class GenerateFragment extends Fragment {
                 Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
 
                 for (File file : files) {
-                    if (file.getName().endsWith(".mp3")) {
-                        String title = file.getName().replace(".mp3", "");
+                    if (file.getName().endsWith(".m4a")) {
+                        String title = file.getName().replace(".m4a", "");
                         String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
                         int problemCount = 0; // 임시 값
                         recordingList.add(new Recording(title, date, problemCount));
