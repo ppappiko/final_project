@@ -19,11 +19,15 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="시험보러 가기"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        android:background="#20C997"
+        android:textColor="@color/white"/>
 
     <Button
         android:id="@+id/btn_solve_later"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="나중에 풀기"/>
+        android:text="나중에 풀기"
+        android:background="#20C997"
+        android:textColor="@color/white"/>
 </LinearLayout>

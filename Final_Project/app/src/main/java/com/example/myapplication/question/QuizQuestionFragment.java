@@ -19,7 +19,6 @@ import java.util.List;
 
 public class QuizQuestionFragment extends Fragment {
 
-    // 더미 데이터를 위한 Question 클래스 (Fragment 파일 밖에 별도로 만들거나 내부에 만들어도 됨)
     private static class Question {
         String questionText;
         String[] options;
@@ -44,10 +43,8 @@ public class QuizQuestionFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_quiz_question, container, false);
 
-        // 더미 데이터 생성
         createDummyQuestions();
 
-        // UI 요소 초기화
         tvQuestion = view.findViewById(R.id.tv_question);
         radioGroup = view.findViewById(R.id.radio_group_options);
         rbOption1 = view.findViewById(R.id.rb_option1);
@@ -57,23 +54,19 @@ public class QuizQuestionFragment extends Fragment {
         btnPrev = view.findViewById(R.id.btn_prev);
         btnNext = view.findViewById(R.id.btn_next);
 
-        // 첫 번째 문제 표시
         showQuestion(currentQuestionIndex);
 
-        // '다음' 버튼 리스너
         btnNext.setOnClickListener(v -> {
             if (currentQuestionIndex < questionList.size() - 1) {
                 currentQuestionIndex++;
                 showQuestion(currentQuestionIndex);
             } else {
-                // 마지막 문제이면 결과 화면으로 이동
                 if (getActivity() instanceof QuizActivity) {
                     ((QuizActivity) getActivity()).showResultScreen();
                 }
             }
         });
 
-        // '이전' 버튼 리스너
         btnPrev.setOnClickListener(v -> {
             if (currentQuestionIndex > 0) {
                 currentQuestionIndex--;

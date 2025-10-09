@@ -32,6 +32,7 @@
         <activity
             android:name=".RecordingActivity"
             android:exported="false" />
+        <activity android:name=".question.QuizActivity" />
 
     </application>
 </manifest>
