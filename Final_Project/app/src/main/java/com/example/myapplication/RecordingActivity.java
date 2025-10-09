@@ -121,7 +121,7 @@ public class RecordingActivity extends AppCompatActivity {
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP); // 출력 파일 형식 설정
 
             // 오디오 파일 저장 경로 설정 (앱의 캐시 디렉토리 사용)
-            audioFilePath = getExternalCacheDir().getAbsolutePath() + "/audiorecordtest.3gp";
+            audioFilePath = getExternalCacheDir().getAbsolutePath() + "/audiorecordtest.mp3";
             mediaRecorder.setOutputFile(audioFilePath);
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB); // 오디오 인코더 설정
 
