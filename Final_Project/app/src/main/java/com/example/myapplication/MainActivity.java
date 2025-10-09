@@ -66,9 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
         // "+ 새로운 녹음" 버튼
         btnNewRecord.setOnClickListener(v -> {
-            // TODO: 녹음 화면으로 이동 or 녹음 시작 (녹음 기능은 이미 구현되어 있다고 가정)
-            Toast.makeText(this, "+ 새로운 녹음 클릭", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, RecordingActivity.class);
+            startActivity(intent);
         });
+
 
         // 하단 네비
         bottomNav.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
