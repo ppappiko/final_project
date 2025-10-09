@@ -119,12 +119,15 @@ public class RecordingActivity extends AppCompatActivity {
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC); // 오디오 소스를 마이크로 설정
 
+
             // 출력 형식을 MPEG_4로 변경 (m4a 파일 포맷)
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 
             // 파일 저장 경로를 임시적으로 설정 (중복 방지를 위해 타임스탬프 사용)
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
             audioFilePath = getExternalCacheDir().getAbsolutePath() + "/TEMP_" + timeStamp + ".m4a"; // 확장자는 .m4a
+
+
 
             mediaRecorder.setOutputFile(audioFilePath);
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC); // 오디오 인코더를 AAC로 설정 (고품질)
