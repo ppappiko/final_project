@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+
         // 앱 시작 시 HomeFragment를 기본으로 보여줌
         getSupportFragmentManager().beginTransaction().replace(R.id.main_frame, homeFragment).commit();
 
