@@ -24,12 +24,10 @@ public class QuizLoadingFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 2초 딜레이
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // 2초 후에 QuizActivity의 showSuccessScreen() 메소드를 호출
             if (getActivity() instanceof QuizActivity) {
                 ((QuizActivity) getActivity()).showSuccessScreen();
             }
-        }, 2000); // 2000ms = 2초
+        }, 2000); // 2초
     }
 }

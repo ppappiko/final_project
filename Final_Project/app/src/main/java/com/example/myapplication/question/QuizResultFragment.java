@@ -23,14 +23,12 @@ public class QuizResultFragment extends Fragment {
         Button btnViewAnswers = view.findViewById(R.id.btn_view_answers);
 
         btnRetry.setOnClickListener(v -> {
-            // '다시 풀어보기' 클릭 시 문제 풀이 화면으로 돌아감
             if (getActivity() instanceof QuizActivity) {
                 ((QuizActivity) getActivity()).showQuestionScreen();
             }
         });
 
         btnViewAnswers.setOnClickListener(v -> {
-            // '정답 보기' 클릭 시 (임시로 토스트 메시지)
             Toast.makeText(getContext(), "정답 보기 기능 준비중", Toast.LENGTH_SHORT).show();
         });
 

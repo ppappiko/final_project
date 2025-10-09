@@ -22,14 +22,12 @@ public class QuizSuccessFragment extends Fragment {
         Button btnSolveLater = view.findViewById(R.id.btn_solve_later);
 
         btnStartQuiz.setOnClickListener(v -> {
-            // '시험보러 가기' 클릭 시 문제 풀이 화면으로 이동
             if (getActivity() instanceof QuizActivity) {
                 ((QuizActivity) getActivity()).showQuestionScreen();
             }
         });
 
         btnSolveLater.setOnClickListener(v -> {
-            // '나중에 풀기' 클릭 시 액티비티 종료
             if (getActivity() != null) {
                 getActivity().finish();
             }

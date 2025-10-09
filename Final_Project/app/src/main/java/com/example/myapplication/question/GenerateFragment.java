@@ -1,5 +1,6 @@
-package com.example.myapplication.Home;
+package com.example.myapplication.question;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.Home.Detail.DetailsFragment;
+import com.example.myapplication.Home.HomeRecyclerAdapter;
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.Recording;
@@ -26,44 +28,25 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class HomeFragment extends Fragment {
+public class GenerateFragment extends Fragment {
 
-    private static final String TAG = "HomeFragment";
+    private static final String TAG = "GenerateFragment";
 
     private RecyclerView recyclerView;
     private HomeRecyclerAdapter adapter;
     private List<Recording> recordingList = new ArrayList<>();
     private TextView tvEmpty;
 
-    private String currentMode = "home"; // 모드를 저장할 변수
-
-    // HomeFragment를 생성할 때 모드를 전달받는 newInstance 메소드 (필수)
-    public static HomeFragment newInstance(String mode) {
-        HomeFragment fragment = new HomeFragment();
-        Bundle args = new Bundle();
-        args.putString("mode", mode);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            currentMode = getArguments().getString("mode", "home");
-        }
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        return inflater.inflate(R.layout.fragment_generate, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(TAG, "onViewCreated: HomeFragment가 생성되었습니다.");
+        Log.d(TAG, "onViewCreated: GenerateFragment가 생성되었습니다.");
 
         // --- 올바른 실행 순서 ---
 
@@ -80,15 +63,15 @@ public class HomeFragment extends Fragment {
 
         // 4. '생성된' 어댑터에 클릭 리스너를 설정합니다. (이제 adapter는 null이 아님)
         adapter.setOnItemClickListener(item -> {
-            DetailsFragment detailsFragment = new DetailsFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("recordingTitle", item.getTitle());
-            bundle.putString("recordingDate", item.getDate());
-            detailsFragment.setArguments(bundle);
+            // QuizActivity로 이동하기 위한 Intent 생성
+            Intent intent = new Intent(getActivity(), QuizActivity.class);
 
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).replaceFragment(detailsFragment);
-            }
+            // (선택) 클릭한 파일의 정보를 QuizActivity로 전달할 수 있습니다.
+            // intent.putExtra("file_title", item.getTitle());
+            // intent.putExtra("file_path", "경로 정보...");
+
+            // QuizActivity 시작
+            startActivity(intent);
         });
 
         // 5. 마지막으로 파일 목록을 불러와서 화면을 갱신합니다.

@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.Home.HomeFragment;
+import com.example.myapplication.question.GenerateFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private final HomeFragment homeFragment = new HomeFragment();
     private final CalendarFragment calendarFragment = new CalendarFragment();
     private final ProfileFragment fragmentFragment = new ProfileFragment();
+    private final GenerateFragment generateFragment = new GenerateFragment();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +67,9 @@ public class MainActivity extends AppCompatActivity {
                 replaceFragment(fragmentFragment);
                 return true;
             }
+            // '문제 생성' 탭을 눌렀을 때 GenerateFragment를 보여주도록 변경
             if (id == R.id.nav_generate) {
-                // '문제 생성' 탭: 선택 모드로 HomeFragment 실행
-                replaceFragment(HomeFragment.newInstance("generate"));
+                replaceFragment(generateFragment);
                 return true;
             }
 
