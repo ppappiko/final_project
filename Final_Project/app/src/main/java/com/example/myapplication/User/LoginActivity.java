@@ -40,25 +40,24 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
         btnToRegister = findViewById(R.id.btn_to_register); // 2. 회원가입 버튼 초기화)
-        btnTest = findViewById(R.id.btn_test);
 
         // 2. Retrofit 클라이언트를 통해 UserService 인터페이스 구현체 생성
         userService = ApiClient.getClient().create(UserService.class);
 
         // 3. 로그인 버튼 클릭 리스너 설정
         btnLogin.setOnClickListener(v -> {
-            String username = etEmail.getText().toString();
+            String email = etEmail.getText().toString();
             String password = etPassword.getText().toString();
 
             // 입력값 검증 (비어있는지 확인)
-            if (username.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(LoginActivity.this, "아이디와 비밀번호를 모두 입력해주세요.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // 4. 서버에 보낼 데이터를 Map 형태로 만듦
             HashMap<String, String> credentials = new HashMap<>();
-            credentials.put("username", username);
+            credentials.put("email", email);
             credentials.put("password", password);
 
             // 5. 서버에 로그인 요청 보내기
@@ -109,26 +108,6 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent); // RegisterActivity 시작
         });
 
-        btnTest.setOnClickListener(v -> {
-            Call<String> call = userService.testConnection();
-            call.enqueue(new Callback<String>() {
-                @Override
-                public void onResponse(Call<String> call, Response<String> response) {
-                    if (response.isSuccessful()) {
-                        // 성공 시 서버가 보낸 "Connection OK" 텍스트를 받음
-                        String message = response.body();
-                        Toast.makeText(LoginActivity.this, "서버 응답: " + message, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(LoginActivity.this, "서버 연결 실패: " + response.code(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<String> call, Throwable t) {
-                    Toast.makeText(LoginActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
 
     }
 }

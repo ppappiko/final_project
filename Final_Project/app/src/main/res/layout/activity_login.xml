@@ -16,15 +16,6 @@
         android:src="@drawable/main_icon"
         android:layout_marginTop="10dp"
         android:contentDescription="앱 로고"/>
-
-    <Button
-        android:id="@+id/btn_test"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:text="연결 테스트"
-        app:layout_constraintTop_toBottomOf="@id/btn_to_register"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="비밀번호"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="5dp"
         android:layout_marginStart="4dp"
         android:layout_marginBottom="4dp"/>
     <EditText

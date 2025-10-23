@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -78,6 +79,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:text="이메일 인증"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_email_verify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"> <!-- tools:visibility는 개발 중 미리보기를 위함 -->
+
+            <EditText
+                android:id="@+id/et_verify_code"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:hint="인증번호 6자리"
+                android:inputType="number"
+                android:background="@drawable/edittext_background"
+                android:paddingStart="16dp" android:paddingEnd="16dp"
+                android:layout_marginEnd="8dp"/>
+            <Button
+                android:id="@+id/btn_confirm_code"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="인증 확인"/>
         </LinearLayout>
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="비밀번호" android:layout_marginTop="16dp"/>

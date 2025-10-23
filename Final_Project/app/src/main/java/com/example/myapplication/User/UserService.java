@@ -18,4 +18,13 @@ public interface UserService {
 
     @GET("/test")
     Call<String> testConnection();
+
+    @POST("/verify/email-request")
+    Call<Map<String, String>> requestEmailVerification(@Body Map<String, String> email);
+
+    @POST("/verify/email-confirm")
+    Call<Map<String, String>> confirmEmailVerification(@Body Map<String, String> verificationData);
+
+    @POST("/check-nickname")
+    Call<Map<String, String>> checkNickname(@Body Map<String, String> nickname);
 }
