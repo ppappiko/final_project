@@ -1,9 +1,13 @@
 package com.example.myapplication.User;
 
+import com.example.myapplication.Home.Detail.Question.Question;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+
+import java.util.List;
 import java.util.Map;
 
 public interface UserService {
@@ -27,4 +31,16 @@ public interface UserService {
 
     @POST("/check-nickname")
     Call<Map<String, String>> checkNickname(@Body Map<String, String> nickname);
+
+    /** 텍스트 요약 요청 */
+    @POST("/ai/summarize")
+    Call<Map<String, String>> summarizeText(@Body Map<String, String> text);
+
+    /**
+     * 문제 생성 요청
+     * 응답이 {"questions": [ ... ]} 형태이므로
+     * Map<String, List<Question>>으로 받습니다.
+     */
+    @POST("/ai/generate-questions")
+    Call<Map<String, List<Question>>> generateQuestions(@Body Map<String, String> text);
 }
