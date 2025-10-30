@@ -14,9 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.Home.Detail.DetailsFragment;
 import com.example.myapplication.Home.HomeRecyclerAdapter;
-import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.Recording;
 
@@ -48,39 +46,27 @@ public class GenerateFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Log.d(TAG, "onViewCreated: GenerateFragment가 생성되었습니다.");
 
-        // --- 올바른 실행 순서 ---
-
-        // 1. UI 요소들을 먼저 찾습니다.
         recyclerView = view.findViewById(R.id.recentList);
         tvEmpty = view.findViewById(R.id.tv_empty);
 
-        // 2. 데이터 목록(recordingList)을 사용해 어댑터를 '생성(초기화)'합니다.
         adapter = new HomeRecyclerAdapter(recordingList);
 
-        // 3. 생성된 어댑터를 RecyclerView와 연결합니다.
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        // 4. '생성된' 어댑터에 클릭 리스너를 설정합니다. (이제 adapter는 null이 아님)
         adapter.setOnItemClickListener(item -> {
-            // QuizActivity로 이동하기 위한 Intent 생성
             Intent intent = new Intent(getActivity(), QuizActivity.class);
 
-            // (선택) 클릭한 파일의 정보를 QuizActivity로 전달할 수 있습니다.
-            // intent.putExtra("file_title", item.getTitle());
-            // intent.putExtra("file_path", "경로 정보...");
+            // 클릭한 파일의 제목과 경로를 QuizActivity로 전달
+            intent.putExtra("file_title", item.getTitle());
+            intent.putExtra("file_path", item.getFilePath());
 
-            // QuizActivity 시작
             startActivity(intent);
         });
 
-        // 5. 마지막으로 파일 목록을 불러와서 화면을 갱신합니다.
-        // onResume에서도 호출되므로 여기서 꼭 필요하지 않을 수 있지만,
-        // 초기 로딩을 위해 두는 것이 좋습니다.
         loadRecordingsFromStorage();
     }
 
-    // 화면이 다시 보일 때마다 목록을 새로고침
     @Override
     public void onResume() {
         super.onResume();
@@ -90,11 +76,14 @@ public class GenerateFragment extends Fragment {
     private void loadRecordingsFromStorage() {
         Log.d(TAG, "내부 저장소에서 파일 읽기를 시작합니다.");
 
-        // 권한이 필요 없는 '내부 저장소' 경로를 지정합니다.
         File recordingsDir = getContext().getExternalFilesDir(null);
+        if (recordingsDir == null) {
+            Log.e(TAG, "External files directory not found.");
+            return; // Exit if directory is not available
+        }
         Log.d(TAG, "검색할 폴더 경로: " + recordingsDir.getAbsolutePath());
 
-        recordingList.clear(); // 목록을 새로 채우기 전에 항상 비웁니다.
+        recordingList.clear();
 
         if (recordingsDir.exists()) {
             File[] files = recordingsDir.listFiles();
@@ -108,7 +97,8 @@ public class GenerateFragment extends Fragment {
                         String title = file.getName().replace(".m4a", "");
                         String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
                         int problemCount = 0; // 임시 값
-                        recordingList.add(new Recording(title, date, problemCount));
+                        // 파일 경로를 포함하여 Recording 객체 생성
+                        recordingList.add(new Recording(title, date, problemCount, file.getAbsolutePath()));
                     }
                 }
             }
@@ -116,7 +106,6 @@ public class GenerateFragment extends Fragment {
             Log.d(TAG, "오류가 났습니다.");
         }
 
-        // 목록이 비어있는지 확인하고, 그에 따라 UI를 업데이트합니다.
         if (recordingList.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
             tvEmpty.setVisibility(View.VISIBLE);
