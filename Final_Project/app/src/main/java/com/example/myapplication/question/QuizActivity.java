@@ -2,6 +2,7 @@ package com.example.myapplication.question;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
 
@@ -12,34 +13,32 @@ public class QuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
 
-        // 액티비티가 처음 생성될 때만 첫 프래그먼트를 추가
-        // (화면 회전 등에도 프래그먼트가 중복 생성되지 않도록 함)
         if (savedInstanceState == null) {
-            // 첫 화면으로 로딩 프래그먼트를 보여줌
+            // 시작 시 QuizLoadingFragment를 띄웁니다.
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.quiz_frame, new QuizLoadingFragment())
                     .commit();
         }
     }
 
-    /** QuizLoadingFragment가 호출할 메소드 */
-    public void showSuccessScreen() {
+    // 로딩 완료 후 성공 화면을 띄우는 메소드 (Bundle과 함께)
+    public void showSuccessScreen(Fragment successFragmentWithArgs) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.quiz_frame, new QuizSuccessFragment())
+                .replace(R.id.quiz_frame, successFragmentWithArgs)
                 .commit();
     }
 
-    /** QuizSuccessFragment 또는 QuizResultFragment가 호출할 메소드 */
-    public void showQuestionScreen() {
+    // 퀴즈 시작 시 문제 화면을 띄우는 메소드 (Bundle과 함께)
+    public void showQuestionScreen(Fragment questionFragmentWithArgs) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.quiz_frame, new QuizQuestionFragment())
+                .replace(R.id.quiz_frame, questionFragmentWithArgs)
                 .commit();
     }
 
-    /** QuizQuestionFragment가 호출할 메소드 */
-    public void showResultScreen() {
+    // 퀴즈 완료 시 결과 화면을 띄우는 메소드 (Bundle과 함께)
+    public void showResultScreen(Fragment resultFragmentWithArgs) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.quiz_frame, new QuizResultFragment())
+                .replace(R.id.quiz_frame, resultFragmentWithArgs)
                 .commit();
     }
 }

@@ -41,5 +41,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
+
