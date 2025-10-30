@@ -20,6 +20,7 @@ public class DetailsFragment extends Fragment {
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private TextView tvTitle, tvDate;
+    private String recordingFilePath;
 
     @Nullable
     @Override
@@ -40,12 +41,13 @@ public class DetailsFragment extends Fragment {
         if (getArguments() != null) {
             String title = getArguments().getString("recordingTitle");
             String date = getArguments().getString("recordingDate");
+            recordingFilePath = getArguments().getString("recordingFilePath"); // 파일 경로 받기
             tvTitle.setText(title);
             tvDate.setText(date);
         }
 
-        // ViewPager2 어댑터 설정
-        DetailsViewPagerAdapter adapter = new DetailsViewPagerAdapter(this);
+        // ViewPager2 어댑터 설정 (파일 경로 전달)
+        DetailsViewPagerAdapter adapter = new DetailsViewPagerAdapter(this, recordingFilePath);
         viewPager.setAdapter(adapter);
 
         // TabLayout과 ViewPager2 연결

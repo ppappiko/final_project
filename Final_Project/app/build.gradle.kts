@@ -41,10 +41,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-    // Retrofit: 서버 통신 라이브러리
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-// Gson Converter: JSON 데이터를 자바 객체로 변환
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
+

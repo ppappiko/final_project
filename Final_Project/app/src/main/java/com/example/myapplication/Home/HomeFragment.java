@@ -84,6 +84,7 @@ public class HomeFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putString("recordingTitle", item.getTitle());
             bundle.putString("recordingDate", item.getDate());
+            bundle.putString("recordingFilePath", item.getFilePath()); // 파일 경로 추가
             detailsFragment.setArguments(bundle);
 
             if (getActivity() instanceof MainActivity) {
@@ -121,11 +122,13 @@ public class HomeFragment extends Fragment {
                 Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
 
                 for (File file : files) {
+                    // .m4a 확장자를 찾도록 복원
                     if (file.getName().endsWith(".m4a")) {
+                        // .m4a 확장자를 제거하도록 복원
                         String title = file.getName().replace(".m4a", "");
                         String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
                         int problemCount = 0; // 임시 값
-                        recordingList.add(new Recording(title, date, problemCount));
+                        recordingList.add(new Recording(title, date, problemCount, file.getAbsolutePath())); // 파일 경로 저장
                     }
                 }
             }
