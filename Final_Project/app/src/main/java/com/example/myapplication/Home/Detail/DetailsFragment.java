@@ -11,15 +11,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.Home.Detail.Transcript.TranscriptFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 public class DetailsFragment extends Fragment {
 
-    private TabLayout tabLayout;
     private ViewPager2 viewPager;
-    private TextView tvTitle, tvDate;
     private String recordingFilePath;
 
     @Nullable
@@ -32,25 +32,22 @@ public class DetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        tabLayout = view.findViewById(R.id.tab_layout);
+        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
-        tvTitle = view.findViewById(R.id.tv_detail_title);
-        tvDate = view.findViewById(R.id.tv_detail_date);
+        TextView tvTitle = view.findViewById(R.id.tv_detail_title);
+        TextView tvDate = view.findViewById(R.id.tv_detail_date);
 
-        // HomeFragment에서 전달받은 데이터 표시
         if (getArguments() != null) {
             String title = getArguments().getString("recordingTitle");
             String date = getArguments().getString("recordingDate");
-            recordingFilePath = getArguments().getString("recordingFilePath"); // 파일 경로 받기
+            recordingFilePath = getArguments().getString("recordingFilePath");
             tvTitle.setText(title);
             tvDate.setText(date);
         }
 
-        // ViewPager2 어댑터 설정 (파일 경로 전달)
         DetailsViewPagerAdapter adapter = new DetailsViewPagerAdapter(this, recordingFilePath);
         viewPager.setAdapter(adapter);
 
-        // TabLayout과 ViewPager2 연결
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) {
                 tab.setText("대화 내용");
@@ -58,5 +55,48 @@ public class DetailsFragment extends Fragment {
                 tab.setText("AI 요약");
             }
         }).attach();
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                updateRefreshButtonVisibility();
+            }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) { }
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) { }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateRefreshButtonVisibility();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).showRefreshButton(false);
+        }
+    }
+
+    public void updateRefreshButtonVisibility() {
+        if (getActivity() instanceof MainActivity) {
+            // ViewPager2가 준비될 때까지 잠시 기다린 후 실행하여 NullPointerException 방지
+            viewPager.post(() -> {
+                Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
+                boolean shouldShow = viewPager.getCurrentItem() == 0 && currentItem instanceof TranscriptFragment && ((TranscriptFragment) currentItem).isShowingResult();
+                ((MainActivity) getActivity()).showRefreshButton(shouldShow);
+            });
+        }
+    }
+
+    public void requestRefreshToChild() {
+        Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
+        if (currentItem instanceof TranscriptFragment) {
+            ((TranscriptFragment) currentItem).handleRefreshRequest();
+        }
     }
 }

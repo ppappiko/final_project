@@ -1,5 +1,6 @@
 package com.example.myapplication.question;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,7 +46,6 @@ public class GenerateFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(TAG, "onViewCreated: GenerateFragment가 생성되었습니다.");
 
         recyclerView = view.findViewById(R.id.recentList);
         tvEmpty = view.findViewById(R.id.tv_empty);
@@ -56,12 +57,21 @@ public class GenerateFragment extends Fragment {
 
         adapter.setOnItemClickListener(item -> {
             Intent intent = new Intent(getActivity(), QuizActivity.class);
-
-            // 클릭한 파일의 제목과 경로를 QuizActivity로 전달
             intent.putExtra("file_title", item.getTitle());
             intent.putExtra("file_path", item.getFilePath());
-
             startActivity(intent);
+        });
+
+        // 아이템 길게 누르기 리스너 설정 (삭제 기능)
+        adapter.setOnItemLongClickListener(item -> {
+            new AlertDialog.Builder(getContext())
+                    .setTitle(item.getTitle() + " 녹음 삭제")
+                    .setMessage("이 녹음과 관련된 모든 파일(오디오, 텍스트)을 삭제하시겠습니까?")
+                    .setPositiveButton("삭제", (dialog, which) -> {
+                        deleteRecording(item);
+                    })
+                    .setNegativeButton("취소", null)
+                    .show();
         });
 
         loadRecordingsFromStorage();
@@ -73,39 +83,55 @@ public class GenerateFragment extends Fragment {
         loadRecordingsFromStorage();
     }
 
-    private void loadRecordingsFromStorage() {
-        Log.d(TAG, "내부 저장소에서 파일 읽기를 시작합니다.");
-
-        File recordingsDir = getContext().getExternalFilesDir(null);
-        if (recordingsDir == null) {
-            Log.e(TAG, "External files directory not found.");
-            return; // Exit if directory is not available
+    private void deleteRecording(Recording recording) {
+        File audioFile = new File(recording.getFilePath());
+        boolean audioDeleted = false;
+        if (audioFile.exists()) {
+            audioDeleted = audioFile.delete();
         }
-        Log.d(TAG, "검색할 폴더 경로: " + recordingsDir.getAbsolutePath());
 
+        String textFilePath = recording.getFilePath().replaceAll("\\.m4a$", ".txt");
+        File textFile = new File(textFilePath);
+        if (textFile.exists()) {
+            textFile.delete();
+        }
+
+        if (audioDeleted) {
+            Toast.makeText(getContext(), "녹음 파일이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+            int position = recordingList.indexOf(recording);
+            if (position != -1) {
+                recordingList.remove(position);
+                adapter.notifyItemRemoved(position);
+                adapter.notifyItemRangeChanged(position, recordingList.size());
+                updateEmptyView();
+            }
+        } else {
+            Toast.makeText(getContext(), "파일 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadRecordingsFromStorage() {
         recordingList.clear();
-
-        if (recordingsDir.exists()) {
+        File recordingsDir = getContext().getExternalFilesDir(null);
+        if (recordingsDir != null && recordingsDir.exists()) {
             File[] files = recordingsDir.listFiles();
             if (files != null) {
-                Log.d(TAG, "발견된 파일 개수: " + files.length);
-
                 Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
-
                 for (File file : files) {
                     if (file.getName().endsWith(".m4a")) {
                         String title = file.getName().replace(".m4a", "");
                         String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
                         int problemCount = 0; // 임시 값
-                        // 파일 경로를 포함하여 Recording 객체 생성
                         recordingList.add(new Recording(title, date, problemCount, file.getAbsolutePath()));
                     }
                 }
             }
-        } else {
-            Log.d(TAG, "오류가 났습니다.");
         }
+        updateEmptyView();
+        adapter.notifyDataSetChanged();
+    }
 
+    private void updateEmptyView() {
         if (recordingList.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
             tvEmpty.setVisibility(View.VISIBLE);
@@ -113,8 +139,5 @@ public class GenerateFragment extends Fragment {
             recyclerView.setVisibility(View.VISIBLE);
             tvEmpty.setVisibility(View.GONE);
         }
-
-        adapter.notifyDataSetChanged();
-        Log.d(TAG, "목록 새로고침 완료. 최종 크기: " + recordingList.size());
     }
 }
