@@ -14,24 +14,30 @@ import java.util.List;
 
 public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapter.ViewHolder> {
 
-    private final List<Recording> recordingList; // 1. 데이터 목록을 저장할 변수
+    private final List<Recording> recordingList;
 
-    // --- 클릭 리스너를 위한 인터페이스 ---
+    // --- 클릭 리스너 인터페이스 ---
     public interface OnItemClickListener {
         void onItemClick(Recording item);
     }
-    private OnItemClickListener listener;
+    private OnItemClickListener clickListener;
     public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
+        this.clickListener = listener;
     }
-    // ------------------------------------
 
-    // 2. 생성자: 외부에서 데이터 목록을 받아와서 어댑터의 변수와 연결
+    // --- 길게 누르기 리스너 인터페이스 ---
+    public interface OnItemLongClickListener {
+        void onItemLongClick(Recording item);
+    }
+    private OnItemLongClickListener longClickListener;
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        this.longClickListener = listener;
+    }
+
     public HomeRecyclerAdapter(List<Recording> recordingList) {
         this.recordingList = recordingList;
     }
 
-    // 3. ViewHolder 생성: item_home_recording.xml을 inflate(객체화)
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -39,20 +45,17 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapte
         return new ViewHolder(view);
     }
 
-    // 4. ViewHolder에 데이터 바인딩
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Recording item = recordingList.get(position);
-        holder.bind(item, listener);
+        holder.bind(item, clickListener, longClickListener);
     }
 
-    // 5. 전체 아이템 개수 반환
     @Override
     public int getItemCount() {
         return recordingList.size();
     }
 
-    // ViewHolder 내부 클래스
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvTitle;
         private final TextView tvDate;
@@ -65,16 +68,24 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapte
             tvProblems = itemView.findViewById(R.id.tv_item_problems);
         }
 
-        public void bind(final Recording item, final OnItemClickListener listener) {
+        public void bind(final Recording item, final OnItemClickListener clickListener, final OnItemLongClickListener longClickListener) {
             tvTitle.setText(item.getTitle());
             tvDate.setText(item.getDate());
             tvProblems.setText(item.getProblemCount() + "문제");
 
-            // 아이템 뷰에 클릭 리스너 설정
             itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onItemClick(item);
+                if (clickListener != null) {
+                    clickListener.onItemClick(item);
                 }
+            });
+
+            // 길게 누르기 리스너 설정
+            itemView.setOnLongClickListener(v -> {
+                if (longClickListener != null) {
+                    longClickListener.onItemLongClick(item);
+                    return true; // 이벤트를 소비했음을 알림
+                }
+                return false;
             });
         }
     }

@@ -32,19 +32,31 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="#1E1E1E" />
+
+        <ImageView
+            android:id="@+id/btnRefresh"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="다시 받아쓰기"
+            android:src="@drawable/ic_refresh"
+            app:tint="#31302E"
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/btnSearch"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginEnd="16dp"
-            android:contentDescription="null"
-            android:src="@drawable/search" />
+            android:contentDescription="Search"
+            android:src="@drawable/ic_search_new" />
+
         <ImageView
             android:id="@+id/btnBell"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="null"
-            android:src="@drawable/alert" />
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:contentDescription="Alert"
+            android:src="@drawable/ic_bell_new" />
     </LinearLayout>
 
     <FrameLayout

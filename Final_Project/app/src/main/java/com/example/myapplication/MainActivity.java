@@ -17,15 +17,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
+    // 인터페이스 정의
+    public interface OnRefreshButtonClickListener {
+        void onRefreshClick();
+    }
+
     private BottomNavigationView bottomNav;
     private Button btnNewRecord;
-    private ImageView btnSearch, btnBell;
+    private ImageView btnSearch, btnBell, btnRefresh;
 
     private final HomeFragment homeFragment = new HomeFragment();
     private final CalendarFragment calendarFragment = new CalendarFragment();
     private final ProfileFragment profileFragment = new ProfileFragment();
     private final GenerateFragment generateFragment = new GenerateFragment();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,16 +40,25 @@ public class MainActivity extends AppCompatActivity {
         btnNewRecord = findViewById(R.id.btnNewRecord);
         btnSearch    = findViewById(R.id.btnSearch);
         btnBell      = findViewById(R.id.btnBell);
+        btnRefresh   = findViewById(R.id.btnRefresh); // 새로고침 버튼 바인딩
 
         btnSearch.setOnClickListener(v -> Toast.makeText(this, "검색 클릭", Toast.LENGTH_SHORT).show());
         btnBell.setOnClickListener(v -> Toast.makeText(this, "알림 클릭", Toast.LENGTH_SHORT).show());
+
+        // 새로고침 버튼 리스너
+        btnRefresh.setOnClickListener(v -> {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
+            // 현재 프래그먼트가 DetailsFragment이고, 그 안의 TranscriptFragment에게 이벤트를 전달해야 함
+            if (currentFragment instanceof DetailsFragment) {
+                ((DetailsFragment) currentFragment).requestRefreshToChild();
+            }
+        });
 
         btnNewRecord.setOnClickListener(v -> {
             Intent intent = new Intent(this, RecordingActivity.class);
             startActivity(intent);
         });
 
-        // 앱 시작 시 HomeFragment를 기본으로 보여줌
         replaceFragment(homeFragment);
 
         bottomNav.setOnItemSelectedListener(item -> {
@@ -71,18 +84,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void replaceFragment(Fragment fragment) {
-        // DetailsFragment가 보일 때는 '새로운 녹음' 버튼을 숨김
         if (fragment instanceof DetailsFragment) {
             btnNewRecord.setVisibility(View.GONE);
         } else {
-            // 다른 프래그먼트에서는 버튼을 다시 보이게 함
             btnNewRecord.setVisibility(View.VISIBLE);
+            btnRefresh.setVisibility(View.GONE); // DetailsFragment가 아니면 새로고침 버튼은 항상 숨김
         }
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_frame, fragment)
-                // 사용자가 뒤로가기 버튼을 눌렀을 때 이전 프래그먼트로 돌아갈 수 있도록 스택에 추가
                 .addToBackStack(null)
                 .commit();
+    }
+
+    // DetailsFragment가 호출할 메소드
+    public void showRefreshButton(boolean show) {
+        btnRefresh.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

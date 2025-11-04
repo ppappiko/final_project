@@ -1,5 +1,6 @@
 package com.example.myapplication.Home.Detail.Transcript;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,6 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.myapplication.Home.Detail.DetailsFragment;
+import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 
 import org.json.JSONException;
@@ -46,6 +49,7 @@ public class TranscriptFragment extends Fragment {
     private Button btnDictation;
     private ProgressBar progressBar;
     private String filePath;
+    private boolean isShowingResult = false;
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(180, TimeUnit.SECONDS)
@@ -74,9 +78,7 @@ public class TranscriptFragment extends Fragment {
             filePath = getArguments().getString("filePath");
         }
 
-        // 프래그먼트가 생성될 때, 저장된 텍스트 파일이 있는지 확인
         if (!loadExistingTranscript()) {
-            // 파일이 없으면 받아쓰기 버튼 표시
             btnDictation.setVisibility(View.VISIBLE);
             scrollView.setVisibility(View.GONE);
         }
@@ -88,6 +90,23 @@ public class TranscriptFragment extends Fragment {
                 Toast.makeText(getContext(), "녹음 파일을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // DetailsFragment로부터 새로고침 요청을 받았을 때 호출될 메소드
+    public void handleRefreshRequest() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("다시 받아쓰기")
+                .setMessage("기존 내용을 지우고 다시 받아쓰기를 실행할까요?")
+                .setPositiveButton("실행", (dialog, which) -> {
+                    transcribeAudio(filePath);
+                })
+                .setNegativeButton("취소", null)
+                .show();
+    }
+
+    // 현재 STT 결과를 보여주고 있는지 여부를 반환
+    public boolean isShowingResult() {
+        return isShowingResult;
     }
 
     private boolean loadExistingTranscript() {
@@ -104,13 +123,13 @@ public class TranscriptFragment extends Fragment {
                 fis.read(data);
                 String transcript = new String(data, StandardCharsets.UTF_8);
                 displayTranscript(transcript);
-                return true; // 불러오기 성공
+                return true;
             } catch (IOException e) {
                 Log.e(TAG, "Failed to read existing transcript file", e);
-                return false; // 불러오기 실패
+                return false;
             }
         }
-        return false; // 파일이 존재하지 않음
+        return false;
     }
 
     private void transcribeAudio(String audioFilePath) {
@@ -169,6 +188,7 @@ public class TranscriptFragment extends Fragment {
     }
 
     private void displayTranscript(String text) {
+        isShowingResult = true;
         if (text != null && !text.isEmpty()) {
             tvTranscript.setText(text);
         } else {
@@ -176,32 +196,37 @@ public class TranscriptFragment extends Fragment {
         }
         scrollView.setVisibility(View.VISIBLE);
         btnDictation.setVisibility(View.GONE);
+        updateRefreshButtonVisibilityInParent();
     }
 
     private void saveTranscriptToFile(String text) {
         if (filePath == null || filePath.isEmpty()) {
-            Toast.makeText(getContext(), "파일 경로가 없어 저장을 스킵합니다.", Toast.LENGTH_SHORT).show();
             return;
         }
-
         String textFilePath = filePath.replaceAll("\\.m4a$", ".txt");
         File textFile = new File(textFilePath);
-
         try (FileOutputStream fos = new FileOutputStream(textFile)) {
             fos.write(text.getBytes(StandardCharsets.UTF_8));
-            Toast.makeText(getContext(), "텍스트가 파일로 저장되었습니다.", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Log.e(TAG, "Failed to save transcript file", e);
-            Toast.makeText(getContext(), "텍스트 파일 저장에 실패했습니다.", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void setLoadingState(boolean isLoading) {
+        isShowingResult = !isLoading;
         if (isLoading) {
             progressBar.setVisibility(View.VISIBLE);
             btnDictation.setVisibility(View.GONE);
+            scrollView.setVisibility(View.GONE);
         } else {
             progressBar.setVisibility(View.GONE);
+        }
+        updateRefreshButtonVisibilityInParent();
+    }
+    
+    private void updateRefreshButtonVisibilityInParent(){
+        if(getParentFragment() instanceof DetailsFragment){
+            ((DetailsFragment) getParentFragment()).updateRefreshButtonVisibility();
         }
     }
 }
