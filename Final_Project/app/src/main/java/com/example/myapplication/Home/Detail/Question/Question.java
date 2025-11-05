@@ -13,31 +13,33 @@ public class Question implements Serializable {
     private List<String> options;
     private int correctAnswerIndex;
 
-    // Gson이 JSON을 파싱할 때 기본 생성자가 필요할 수 있습니다.
-    public Question() {}
+    // ▼ (퀴즈 진행 중 사용자가 선택한 답을 저장) ▼
+    private int userAnswer = -1; // -1은 "아직 안 품"
 
-    // Getter와 Setter (Gson과 코드에서 사용)
+    // --- Getter ---
     public String getQuestionText() {
         return questionText;
-    }
-
-    public void setQuestionText(String questionText) {
-        this.questionText = questionText;
     }
 
     public List<String> getOptions() {
         return options;
     }
 
-    public void setOptions(List<String> options) {
-        this.options = options;
-    }
-
     public int getCorrectAnswerIndex() {
         return correctAnswerIndex;
     }
 
-    public void setCorrectAnswerIndex(int correctAnswerIndex) {
-        this.correctAnswerIndex = correctAnswerIndex;
+    public int getUserAnswer() {
+        return userAnswer;
     }
+
+    // --- Setter ---
+    public void setUserAnswer(int userAnswer) {
+        this.userAnswer = userAnswer;
+    }
+
+    // (Gson 파싱을 위한 Setter들 - 이미 있다고 가정)
+    public void setQuestionText(String questionText) { this.questionText = questionText; }
+    public void setOptions(List<String> options) { this.options = options; }
+    public void setCorrectAnswerIndex(int correctAnswerIndex) { this.correctAnswerIndex = correctAnswerIndex; }
 }

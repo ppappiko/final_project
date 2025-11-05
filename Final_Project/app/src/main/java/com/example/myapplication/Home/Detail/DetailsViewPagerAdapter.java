@@ -10,11 +10,11 @@ import com.example.myapplication.Home.Detail.Transcript.TranscriptFragment;
 
 public class DetailsViewPagerAdapter extends FragmentStateAdapter {
 
-    private final String filePath;
+    private Bundle bundle;
 
-    public DetailsViewPagerAdapter(@NonNull Fragment fragment, String filePath) {
+    public DetailsViewPagerAdapter(@NonNull Fragment fragment, Bundle bunble) {
         super(fragment);
-        this.filePath = filePath;
+        this.bundle = bunble;
     }
 
     @NonNull
@@ -29,10 +29,7 @@ public class DetailsViewPagerAdapter extends FragmentStateAdapter {
         }
 
         // 프래그먼트에 파일 경로를 Argument로 전달
-        Bundle args = new Bundle();
-        args.putString("filePath", filePath);
-        fragment.setArguments(args);
-        
+        fragment.setArguments(bundle);
         return fragment;
     }
 

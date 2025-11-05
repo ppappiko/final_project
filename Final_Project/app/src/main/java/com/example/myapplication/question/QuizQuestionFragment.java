@@ -1,7 +1,6 @@
 package com.example.myapplication.question;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,162 +17,120 @@ import androidx.fragment.app.Fragment;
 import com.example.myapplication.Home.Detail.Question.Question;
 import com.example.myapplication.R;
 
-import java.io.Serializable; // Serializable import
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
 public class QuizQuestionFragment extends Fragment {
 
-    private static final String TAG = "QuizQuestionFragment";
+    private List<Question> questionList;
+    private int currentQuestionIndex = 0;
 
-    private List<Question> questionList = new ArrayList<>(); // 문제 목록 저장
-    private int currentQuestionIndex = 0; // 현재 보여주는 문제의 인덱스
-    private int[] userAnswers; // 사용자의 답안을 저장할 배열
-
-    private int correctAnswers = 0;
-
-    // UI 요소 변수
-    private TextView tvQuestion;
+    private TextView tvQuestionNumber, tvQuestionText;
     private RadioGroup radioGroupOptions;
-    private RadioButton rbOption1, rbOption2, rbOption3, rbOption4;
-    private Button btnPrev, btnNext;
+    private RadioButton radioOption1, radioOption2, radioOption3, radioOption4;
+    private Button btnNextQuestion;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 프래그먼트 생성 시, Bundle에서 문제 목록을 꺼냅니다.
+        // 1. 퀴즈 시작 화면(QuizSuccessFragment)으로부터 "questionList"를 받습니다.
         if (getArguments() != null) {
             questionList = (List<Question>) getArguments().getSerializable("questionList");
-            if (questionList == null) {
-                questionList = new ArrayList<>(); // null 방지
-                Log.e(TAG, "Bundle에서 questionList를 가져오지 못했습니다.");
-            } else {
-                // 문제 목록 크기만큼 사용자 답안 저장 배열 초기화 (-1은 아직 선택 안 함을 의미)
-                userAnswers = new int[questionList.size()];
-                for (int i = 0; i < userAnswers.length; i++) {
-                    userAnswers[i] = -1;
-                }
-            }
-        } else {
-            Log.e(TAG, "Bundle이 null입니다.");
         }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_quiz_question, container, false);
+        return inflater.inflate(R.layout.fragment_quiz_question, container, false);
+    }
 
-        // UI 요소 초기화
-        tvQuestion = view.findViewById(R.id.tv_question);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        tvQuestionNumber = view.findViewById(R.id.tv_question_number);
+        tvQuestionText = view.findViewById(R.id.tv_question_text);
         radioGroupOptions = view.findViewById(R.id.radio_group_options);
-        rbOption1 = view.findViewById(R.id.rb_option1);
-        rbOption2 = view.findViewById(R.id.rb_option2);
-        rbOption3 = view.findViewById(R.id.rb_option3);
-        rbOption4 = view.findViewById(R.id.rb_option4);
-        btnPrev = view.findViewById(R.id.btn_prev);
-        btnNext = view.findViewById(R.id.btn_next);
+        radioOption1 = view.findViewById(R.id.radio_option1);
+        radioOption2 = view.findViewById(R.id.radio_option2);
+        radioOption3 = view.findViewById(R.id.radio_option3);
+        radioOption4 = view.findViewById(R.id.radio_option4);
+        btnNextQuestion = view.findViewById(R.id.btn_next_question);
 
-        // 첫 번째 문제 표시 (문제 목록이 비어있지 않다면)
-        if (!questionList.isEmpty()) {
-            showQuestion(currentQuestionIndex);
-        } else {
-            // 문제 목록이 비어있을 경우 사용자에게 알림
-            Toast.makeText(getContext(), "표시할 문제가 없습니다.", Toast.LENGTH_LONG).show();
+        if (questionList == null || questionList.isEmpty()) {
+            Toast.makeText(getContext(), "문제를 표시할 수 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        // '다음 문제' 버튼 클릭 리스너
-        btnNext.setOnClickListener(v -> {
-            saveUserAnswer(); // 현재 선택한 답 저장
+        // 2. 첫 번째 문제 표시
+        showQuestion(currentQuestionIndex);
 
-            if (currentQuestionIndex < questionList.size() - 1) {
-                // 다음 문제가 있으면 다음 문제 표시
-                currentQuestionIndex++;
+        // 3. '다음' 버튼 리스너
+        btnNextQuestion.setOnClickListener(v -> {
+            saveUserAnswer(); // 3-1. 현재 선택한 답을 Question 객체에 저장
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questionList.size()) {
+                // 3-2. 다음 문제 표시
                 showQuestion(currentQuestionIndex);
-            } else {
-                // 마지막 문제이면 결과 화면으로 이동
-                if (getActivity() instanceof QuizActivity) {
-                    calculateScoreAndShowResult();
+                if (currentQuestionIndex == questionList.size() - 1) {
+                    btnNextQuestion.setText("결과 보기");
                 }
-            }
-        });
-
-        // '이전 문제' 버튼 클릭 리스너
-        btnPrev.setOnClickListener(v -> {
-            saveUserAnswer(); // 현재 선택한 답 저장
-
-            if (currentQuestionIndex > 0) {
-                // 이전 문제가 있으면 이전 문제 표시
-                currentQuestionIndex--;
-                showQuestion(currentQuestionIndex);
-            }
-        });
-
-        return view;
-    }
-
-    /** 지정된 인덱스의 문제를 화면에 표시하는 메소드 */
-    private void showQuestion(int index) {
-        if (index < 0 || index >= questionList.size()) return; // 유효하지 않은 인덱스 방지
-
-        Question currentQuestion = questionList.get(index);
-        tvQuestion.setText(currentQuestion.getQuestionText());
-
-        // 선택지 설정 (옵션 개수가 4개 미만일 경우 대비)
-        List<String> options = currentQuestion.getOptions();
-        RadioButton[] radioButtons = {rbOption1, rbOption2, rbOption3, rbOption4};
-        for(int i = 0; i < radioButtons.length; i++) {
-            if (i < options.size()) {
-                radioButtons[i].setText(options.get(i));
-                radioButtons[i].setVisibility(View.VISIBLE);
             } else {
-                radioButtons[i].setVisibility(View.GONE); // 옵션이 없으면 숨김
+                // 3-3. 퀴즈 끝! 결과 화면으로 이동
+                showQuizResults();
             }
-        }
-
-        // 이전에 선택했던 답이 있으면 표시, 없으면 선택 해제
-        if (userAnswers[index] != -1) {
-            RadioButton savedButton = (RadioButton) radioGroupOptions.getChildAt(userAnswers[index]);
-            if (savedButton != null) savedButton.setChecked(true);
-        } else {
-            radioGroupOptions.clearCheck();
-        }
-
-        // 버튼 상태 업데이트 (첫 문제면 '이전' 비활성화)
-        btnPrev.setEnabled(index > 0);
-        // 마지막 문제면 '다음' 대신 '결과 보기' 등으로 텍스트 변경 가능
-        // btnNext.setText(index == questionList.size() - 1 ? "결과 보기" : "다음 문제 >");
+        });
     }
 
-    /** 현재 RadioGroup에서 선택된 답을 userAnswers 배열에 저장하는 메소드 */
+    private void showQuestion(int index) {
+        Question currentQuestion = questionList.get(index);
+
+        tvQuestionNumber.setText("Q" + (index + 1));
+        tvQuestionText.setText(currentQuestion.getQuestionText());
+
+        List<String> options = currentQuestion.getOptions();
+        // (안전장치) 보기 개수에 따라 RadioButton을 보여주거나 숨깁니다.
+        radioOption1.setText(options.size() > 0 ? options.get(0) : "");
+        radioOption2.setText(options.size() > 1 ? options.get(1) : "");
+        radioOption3.setText(options.size() > 2 ? options.get(2) : "");
+        radioOption4.setText(options.size() > 3 ? options.get(3) : "");
+
+        radioOption1.setVisibility(options.size() > 0 ? View.VISIBLE : View.GONE);
+        radioOption2.setVisibility(options.size() > 1 ? View.VISIBLE : View.GONE);
+        radioOption3.setVisibility(options.size() > 2 ? View.VISIBLE : View.GONE);
+        radioOption4.setVisibility(options.size() > 3 ? View.VISIBLE : View.GONE);
+
+        // 이전에 선택한 답이 있으면 복원, 없으면 초기화
+        int userAnswer = currentQuestion.getUserAnswer();
+        if (userAnswer == 0) radioGroupOptions.check(R.id.radio_option1);
+        else if (userAnswer == 1) radioGroupOptions.check(R.id.radio_option2);
+        else if (userAnswer == 2) radioGroupOptions.check(R.id.radio_option3);
+        else if (userAnswer == 3) radioGroupOptions.check(R.id.radio_option4);
+        else radioGroupOptions.clearCheck();
+    }
+
     private void saveUserAnswer() {
         int selectedRadioButtonId = radioGroupOptions.getCheckedRadioButtonId();
-        if (selectedRadioButtonId != -1) {
-            View selectedRadioButton = radioGroupOptions.findViewById(selectedRadioButtonId);
-            int selectedIndex = radioGroupOptions.indexOfChild(selectedRadioButton);
-            userAnswers[currentQuestionIndex] = selectedIndex;
-        } else {
-            userAnswers[currentQuestionIndex] = -1; // 선택 안 함
-        }
+        int userAnswerIndex = -1;
+
+        if (selectedRadioButtonId == R.id.radio_option1) userAnswerIndex = 0;
+        else if (selectedRadioButtonId == R.id.radio_option2) userAnswerIndex = 1;
+        else if (selectedRadioButtonId == R.id.radio_option3) userAnswerIndex = 2;
+        else if (selectedRadioButtonId == R.id.radio_option4) userAnswerIndex = 3;
+
+        // Question 객체에 사용자의 답을 저장합니다.
+        questionList.get(currentQuestionIndex).setUserAnswer(userAnswerIndex);
     }
 
-    /** 점수를 계산하고 결과 화면으로 이동하는 메소드 */
-    private void calculateScoreAndShowResult() {
-        for (int i = 0; i < questionList.size(); i++) {
-            if (userAnswers[i] == questionList.get(i).getCorrectAnswerIndex()) {
-                correctAnswers++;
-            }
-        }
-
-        // 결과 데이터를 Bundle에 담아 ResultFragment로 전달
-        Bundle resultBundle = new Bundle();
-        resultBundle.putInt("totalQuestions", questionList.size());
-        resultBundle.putInt("correctAnswers", correctAnswers);
-        resultBundle.putSerializable("questionList", (Serializable) questionList); // 문제 목록도 전달
-        resultBundle.putIntArray("userAnswers", userAnswers); // 사용자 답안도 전달
+    private void showQuizResults() {
+        Bundle bundle = new Bundle();
+        // 사용자의 답이 모두 저장된 리스트를 "resultList" 키로 넘깁니다.
+        bundle.putSerializable("resultList", (Serializable) questionList);
 
         QuizResultFragment resultFragment = new QuizResultFragment();
-        resultFragment.setArguments(resultBundle);
+        resultFragment.setArguments(bundle);
 
         if (getActivity() instanceof QuizActivity) {
             ((QuizActivity) getActivity()).showResultScreen(resultFragment);
