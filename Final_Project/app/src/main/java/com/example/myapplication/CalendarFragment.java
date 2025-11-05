@@ -8,30 +8,35 @@ import android.widget.CalendarView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.Home.Detail.DetailsFragment;
+import com.example.myapplication.Home.HomeRecyclerAdapter;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class CalendarFragment extends Fragment {
 
-    // 뷰 요소들
     private CalendarView calendarView;
-    private CardView lectureCard;
-    private TextView lectureTitle, lectureDate, lectureDuration;
-
-    // 데이터 저장용 Map
-    private HashMap<String, List<Recording>> recordingsByDate = new HashMap<>();
+    private RecyclerView recyclerView;
+    private TextView tvSelectedDate, tvEmpty;
+    private HomeRecyclerAdapter adapter;
+    private List<Recording> allRecordings = new ArrayList<>();
+    private List<Recording> filteredRecordings = new ArrayList<>();
+    private Calendar currentSelectedCalendar = Calendar.getInstance();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // fragment_calendar.xml 파일을 화면으로 만듭니다.
         return inflater.inflate(R.layout.fragment_calendar, container, false);
     }
 
@@ -39,85 +44,100 @@ public class CalendarFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 액티비티의 onCreate에서 하던 작업을 여기서 합니다.
-        // 프래그먼트에서는 view.findViewById()를 사용해야 합니다.
         calendarView = view.findViewById(R.id.calendarView);
-        lectureCard = view.findViewById(R.id.lectureCard);
-        lectureTitle = view.findViewById(R.id.lectureTitle);
-        lectureDate = view.findViewById(R.id.lectureDate);
-        lectureDuration = view.findViewById(R.id.lectureDuration);
+        recyclerView = view.findViewById(R.id.calendar_recycler_view);
+        tvSelectedDate = view.findViewById(R.id.tv_selected_date);
+        tvEmpty = view.findViewById(R.id.tv_calendar_empty);
 
-        // 샘플 데이터 로드 및 캘린더 설정
-        loadSampleData();
-        setupCalendar();
+        setupRecyclerView();
+        setupCalendarView();
 
-        // 처음 화면이 보일 때 오늘 날짜의 정보 표시
-        Calendar today = Calendar.getInstance();
-        String todayKey = String.format(Locale.KOREA, "%d-%02d-%02d",
-                today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH) + 1,
-                today.get(Calendar.DAY_OF_MONTH));
-        updateLectureCard(todayKey);
+        // 초기 화면 로딩
+        loadAndFilter();
     }
 
-    private void setupCalendar() {
-        calendarView.setOnDateChangeListener((v, year, month, dayOfMonth) -> {
-            String selectedDateKey = String.format(Locale.KOREA, "%d-%02d-%02d", year, month + 1, dayOfMonth);
-            updateLectureCard(selectedDateKey);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 다른 화면에서 돌아왔을 때, 파일 목록 변경사항을 반영하기 위해 다시 로드
+        loadAndFilter();
+    }
+
+    private void setupRecyclerView() {
+        adapter = new HomeRecyclerAdapter(filteredRecordings);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+
+        adapter.setOnItemClickListener(item -> {
+            DetailsFragment detailsFragment = new DetailsFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("recordingTitle", item.getTitle());
+            bundle.putString("recordingDate", item.getDate());
+            bundle.putString("recordingFilePath", item.getFilePath());
+            detailsFragment.setArguments(bundle);
+
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).replaceFragment(detailsFragment);
+            }
         });
     }
 
-    private void updateLectureCard(String dateKey) {
-        List<Recording> selectedRecordings = recordingsByDate.get(dateKey);
+    private void setupCalendarView() {
+        calendarView.setOnDateChangeListener((v, year, month, dayOfMonth) -> {
+            currentSelectedCalendar.set(year, month, dayOfMonth);
+            filterRecordingsByDate(currentSelectedCalendar);
+        });
+    }
 
-        if (selectedRecordings != null && !selectedRecordings.isEmpty()) {
-            Recording recording = selectedRecordings.get(0);
-            lectureTitle.setText(recording.getTitle());
-            lectureDuration.setText(recording.getDuration());
+    private void loadAndFilter(){
+        loadAllRecordingsFromStorage();
+        filterRecordingsByDate(currentSelectedCalendar);
+    }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA);
-            lectureDate.setText(sdf.format(recording.getDate()));
+    private void loadAllRecordingsFromStorage() {
+        allRecordings.clear();
+        if(getContext() == null) return;
+        File recordingsDir = getContext().getExternalFilesDir(null);
+        if (recordingsDir != null && recordingsDir.exists()) {
+            File[] files = recordingsDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.getName().endsWith(".m4a")) {
+                        String title = file.getName().replace(".m4a", "");
+                        String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
+                        allRecordings.add(new Recording(title, date, 0, file.getAbsolutePath()));
+                    }
+                }
+            }
+        }
+    }
 
-            lectureCard.setVisibility(View.VISIBLE);
+    private void filterRecordingsByDate(Calendar selectedCalendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA);
+        String selectedDate = sdf.format(selectedCalendar.getTime());
+
+        tvSelectedDate.setText(selectedDate + " 녹음");
+
+        filteredRecordings.clear();
+        for (Recording rec : allRecordings) {
+            if (rec.getDate().equals(selectedDate)) {
+                filteredRecordings.add(rec);
+            }
+        }
+
+        if(adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+        updateEmptyView();
+    }
+
+    private void updateEmptyView() {
+        if (filteredRecordings.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            tvEmpty.setVisibility(View.VISIBLE);
         } else {
-            lectureCard.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            tvEmpty.setVisibility(View.GONE);
         }
-    }
-
-    // --- 데이터 관련 메소드들 (이전과 동일) ---
-    private void loadSampleData() {
-        addRecording("프로젝트실무1", 2025, 7, 15, "30분"); // 월은 0부터 시작 (7 -> 8월)
-        addRecording("자료구조", 2025, 7, 17, "55분");
-
-        Calendar today = Calendar.getInstance();
-        addRecording("알고리즘", today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH), "10분");
-    }
-
-    private void addRecording(String title, int year, int month, int day, String duration) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        Date date = calendar.getTime();
-        Recording rec = new Recording(title, date, duration);
-
-        String key = String.format(Locale.KOREA, "%d-%02d-%02d", year, month + 1, day);
-
-        if (!recordingsByDate.containsKey(key)) {
-            recordingsByDate.put(key, new ArrayList<>());
-        }
-        recordingsByDate.get(key).add(rec);
-    }
-
-    // 데이터 모델 클래스 (프래그먼트 안에 두거나 별도 파일로 분리 가능)
-    class Recording {
-        private String title;
-        private Date date;
-        private String duration;
-
-        public Recording(String title, Date date, String duration) {
-            this.title = title; this.date = date; this.duration = duration;
-        }
-        public String getTitle() { return title; }
-        public Date getDate() { return date; }
-        public String getDuration() { return duration; }
     }
 }

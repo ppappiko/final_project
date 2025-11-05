@@ -3,10 +3,10 @@ package com.example.myapplication.question;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class GenerateFragment extends Fragment {
-
-    private static final String TAG = "GenerateFragment";
 
     private RecyclerView recyclerView;
     private HomeRecyclerAdapter adapter;
@@ -62,15 +60,18 @@ public class GenerateFragment extends Fragment {
             startActivity(intent);
         });
 
-        // 아이템 길게 누르기 리스너 설정 (삭제 기능)
         adapter.setOnItemLongClickListener(item -> {
+            final CharSequence[] options = {"이름 변경", "파일 삭제"};
+
             new AlertDialog.Builder(getContext())
-                    .setTitle(item.getTitle() + " 녹음 삭제")
-                    .setMessage("이 녹음과 관련된 모든 파일(오디오, 텍스트)을 삭제하시겠습니까?")
-                    .setPositiveButton("삭제", (dialog, which) -> {
-                        deleteRecording(item);
+                    .setTitle(item.getTitle())
+                    .setItems(options, (dialog, which) -> {
+                        if (which == 0) {
+                            showRenameDialog(item);
+                        } else if (which == 1) {
+                            showDeleteConfirmationDialog(item);
+                        }
                     })
-                    .setNegativeButton("취소", null)
                     .show();
         });
 
@@ -83,11 +84,68 @@ public class GenerateFragment extends Fragment {
         loadRecordingsFromStorage();
     }
 
+    private void showRenameDialog(final Recording recording) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("이름 변경");
+
+        final EditText input = new EditText(getContext());
+        input.setText(recording.getTitle());
+        builder.setView(input);
+
+        builder.setPositiveButton("변경", (dialog, which) -> {
+            String newName = input.getText().toString().trim();
+            if (!newName.isEmpty() && !newName.equals(recording.getTitle())) {
+                renameRecording(recording, newName);
+            } else if (newName.isEmpty()) {
+                Toast.makeText(getContext(), "이름을 입력해주세요.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("취소", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    private void renameRecording(Recording recording, String newName) {
+        File oldAudioFile = new File(recording.getFilePath());
+        File parentDir = oldAudioFile.getParentFile();
+
+        File newAudioFile = new File(parentDir, newName + ".m4a");
+
+        if (newAudioFile.exists()) {
+            Toast.makeText(getContext(), "이미 존재하는 이름입니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean audioRenamed = oldAudioFile.renameTo(newAudioFile);
+
+        String oldTextFilePath = recording.getFilePath().replaceAll("\\.m4a$", ".txt");
+        File oldTextFile = new File(oldTextFilePath);
+        if (oldTextFile.exists()) {
+            File newTextFile = new File(parentDir, newName + ".txt");
+            oldTextFile.renameTo(newTextFile);
+        }
+
+        if (audioRenamed) {
+            Toast.makeText(getContext(), "이름이 변경되었습니다.", Toast.LENGTH_SHORT).show();
+            loadRecordingsFromStorage();
+        } else {
+            Toast.makeText(getContext(), "이름 변경에 실패했습니다.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showDeleteConfirmationDialog(final Recording recording) {
+        new AlertDialog.Builder(getContext())
+                .setTitle(recording.getTitle() + " 녹음 삭제")
+                .setMessage("이 녹음과 관련된 모든 파일(오디오, 텍스트)을 삭제하시겠습니까?")
+                .setPositiveButton("삭제", (dialog, which) -> deleteRecording(recording))
+                .setNegativeButton("취소", null)
+                .show();
+    }
+
     private void deleteRecording(Recording recording) {
         File audioFile = new File(recording.getFilePath());
-        boolean audioDeleted = false;
         if (audioFile.exists()) {
-            audioDeleted = audioFile.delete();
+            audioFile.delete();
         }
 
         String textFilePath = recording.getFilePath().replaceAll("\\.m4a$", ".txt");
@@ -96,22 +154,13 @@ public class GenerateFragment extends Fragment {
             textFile.delete();
         }
 
-        if (audioDeleted) {
-            Toast.makeText(getContext(), "녹음 파일이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-            int position = recordingList.indexOf(recording);
-            if (position != -1) {
-                recordingList.remove(position);
-                adapter.notifyItemRemoved(position);
-                adapter.notifyItemRangeChanged(position, recordingList.size());
-                updateEmptyView();
-            }
-        } else {
-            Toast.makeText(getContext(), "파일 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(getContext(), "녹음 파일이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+        loadRecordingsFromStorage();
     }
 
     private void loadRecordingsFromStorage() {
         recordingList.clear();
+        if (getContext() == null) return;
         File recordingsDir = getContext().getExternalFilesDir(null);
         if (recordingsDir != null && recordingsDir.exists()) {
             File[] files = recordingsDir.listFiles();
@@ -121,14 +170,15 @@ public class GenerateFragment extends Fragment {
                     if (file.getName().endsWith(".m4a")) {
                         String title = file.getName().replace(".m4a", "");
                         String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
-                        int problemCount = 0; // 임시 값
-                        recordingList.add(new Recording(title, date, problemCount, file.getAbsolutePath()));
+                        recordingList.add(new Recording(title, date, 0, file.getAbsolutePath()));
                     }
                 }
             }
         }
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
         updateEmptyView();
-        adapter.notifyDataSetChanged();
     }
 
     private void updateEmptyView() {

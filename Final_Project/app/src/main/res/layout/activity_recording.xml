@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     android:background="#F4F5F7">
 
     <LinearLayout
@@ -42,14 +41,16 @@
             android:layout_height="24dp"
             android:layout_marginEnd="16dp"
             android:contentDescription="Search"
-            android:src="@drawable/search" />
+            android:src="@drawable/search"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/btnBell"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="Alert"
-            android:src="@drawable/alert" />
+            android:src="@drawable/alert"
+            android:visibility="gone" />
     </LinearLayout>
 
     <RelativeLayout
@@ -58,7 +59,7 @@
         app:layout_constraintTop_toBottomOf="@+id/topBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNav">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <View
             android:id="@+id/circleBackground"
@@ -105,7 +106,7 @@
             android:id="@+id/btn_stop_record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/btn_pause_resume"
+            android:layout_below="@+id/btn_pause_resume"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="24dp"
             android:background="@drawable/new_record_button"
@@ -113,19 +114,5 @@
             android:textColor="#FFFFFF"
             android:textStyle="bold" />
     </RelativeLayout>
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#FFFFFF"
-        app:itemIconTint="@color/bottom_menu_color"
-        app:itemTextColor="@color/bottom_menu_color"
-        app:labelVisibilityMode="labeled"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_menu" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

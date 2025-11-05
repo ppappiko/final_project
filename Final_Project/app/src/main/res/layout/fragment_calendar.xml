@@ -22,54 +22,30 @@
             android:layout_height="wrap_content" />
     </androidx.cardview.widget.CardView>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/lectureCard"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tv_selected_date"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="@android:color/white"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp">
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="8dp"
+        android:text="오늘의 녹음"
+        android:textColor="#1E1E1E"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/calendar_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-            <TextView
-                android:id="@+id/lectureTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="프로젝트실무1"
-                android:textColor="#1E1E1E"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/lectureDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/lectureTitle"
-                android:layout_marginTop="4dp"
-                android:text="2025.08.15"
-                android:textColor="#868E96" />
-
-            <TextView
-                android:id="@+id/lectureDuration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/lectureDate"
-                android:layout_marginTop="4dp"
-                android:text="30분"
-                android:textColor="#868E96" />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/right" />
-        </RelativeLayout>
-    </androidx.cardview.widget.CardView>
+    <TextView
+        android:id="@+id/tv_calendar_empty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="해당 날짜에 녹음이 없습니다."
+        android:visibility="gone" />
 
 </LinearLayout>

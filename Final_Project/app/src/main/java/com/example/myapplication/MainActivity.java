@@ -1,9 +1,11 @@
 package com.example.myapplication;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -17,7 +19,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
-    // 인터페이스 정의
     public interface OnRefreshButtonClickListener {
         void onRefreshClick();
     }
@@ -40,15 +41,13 @@ public class MainActivity extends AppCompatActivity {
         btnNewRecord = findViewById(R.id.btnNewRecord);
         btnSearch    = findViewById(R.id.btnSearch);
         btnBell      = findViewById(R.id.btnBell);
-        btnRefresh   = findViewById(R.id.btnRefresh); // 새로고침 버튼 바인딩
+        btnRefresh   = findViewById(R.id.btnRefresh);
 
-        btnSearch.setOnClickListener(v -> Toast.makeText(this, "검색 클릭", Toast.LENGTH_SHORT).show());
+        btnSearch.setOnClickListener(v -> showSearchDialog());
         btnBell.setOnClickListener(v -> Toast.makeText(this, "알림 클릭", Toast.LENGTH_SHORT).show());
 
-        // 새로고침 버튼 리스너
         btnRefresh.setOnClickListener(v -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
-            // 현재 프래그먼트가 DetailsFragment이고, 그 안의 TranscriptFragment에게 이벤트를 전달해야 함
             if (currentFragment instanceof DetailsFragment) {
                 ((DetailsFragment) currentFragment).requestRefreshToChild();
             }
@@ -83,12 +82,32 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void showSearchDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("녹음파일 검색");
+
+        final EditText input = new EditText(this);
+        input.setHint("검색어를 입력하세요...");
+        builder.setView(input);
+
+        builder.setPositiveButton("검색", (dialog, which) -> {
+            String query = input.getText().toString().trim();
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
+            if (currentFragment instanceof HomeFragment) {
+                ((HomeFragment) currentFragment).filterRecordingsByContent(query);
+            }
+        });
+        builder.setNegativeButton("취소", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
     public void replaceFragment(Fragment fragment) {
         if (fragment instanceof DetailsFragment) {
             btnNewRecord.setVisibility(View.GONE);
         } else {
             btnNewRecord.setVisibility(View.VISIBLE);
-            btnRefresh.setVisibility(View.GONE); // DetailsFragment가 아니면 새로고침 버튼은 항상 숨김
+            btnRefresh.setVisibility(View.GONE);
         }
 
         getSupportFragmentManager().beginTransaction()
@@ -97,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    // DetailsFragment가 호출할 메소드
     public void showRefreshButton(boolean show) {
         btnRefresh.setVisibility(show ? View.VISIBLE : View.GONE);
     }

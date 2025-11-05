@@ -29,23 +29,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-// 녹음 기능을 담당하는 액티비티 클래스
 public class RecordingActivity extends AppCompatActivity {
 
     private static final String TAG = "RecordingActivity";
 
-    // UI 요소 변수들
     private TextView tvRecordTime;
     private ImageButton btnPauseResume;
     private Button btnStopRecord;
 
-    // 타이머 및 녹음 상태 관리 변수들
     private long startTime = 0L;
     private long timeWhenPaused = 0L;
     private Handler handler = new Handler();
     private boolean isRecording = false;
 
-    // 실제 녹음 기능 관련 객체
     private MediaRecorder mediaRecorder = null;
     private String audioFilePath = null;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -207,13 +203,12 @@ public class RecordingActivity extends AppCompatActivity {
                 Toast.makeText(RecordingActivity.this, "파일 이름이 중복되어 " + newFile.getName() + "으로 저장됩니다.", Toast.LENGTH_LONG).show();
             }
             
-            // renameTo 대신 copyFile 사용
             if (copyFile(tempFile, newFile)) {
                 Toast.makeText(RecordingActivity.this, "녹음 파일 저장 완료: " + newFile.getName(), Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(RecordingActivity.this, "파일 저장 실패", Toast.LENGTH_LONG).show();
             }
-            tempFile.delete(); // 성공하든 실패하든 임시 파일은 삭제
+            tempFile.delete();
             finish();
         });
 
@@ -222,6 +217,10 @@ public class RecordingActivity extends AppCompatActivity {
             Toast.makeText(RecordingActivity.this, "녹음 저장을 취소했습니다.", Toast.LENGTH_SHORT).show();
             finish();
         });
+        
+        // 이 부분이 핵심입니다.
+        builder.setCancelable(false);
+
         builder.show();
     }
     
