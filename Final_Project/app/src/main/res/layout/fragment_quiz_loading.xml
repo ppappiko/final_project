@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <ProgressBar
-        android:id="@+id/progress_bar"
+        android:id="@+id/progressBar"
         android:layout_width="100dp"
         android:layout_height="100dp"
         app:layout_constraintVertical_bias="0.4"
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:text="문제 생성중입니다 잠시만 기다려 주세요"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/progress_bar"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

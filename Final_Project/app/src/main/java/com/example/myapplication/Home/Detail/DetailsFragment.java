@@ -36,16 +36,16 @@ public class DetailsFragment extends Fragment {
         viewPager = view.findViewById(R.id.view_pager);
         TextView tvTitle = view.findViewById(R.id.tv_detail_title);
         TextView tvDate = view.findViewById(R.id.tv_detail_date);
+        Bundle bundle = getArguments();
 
-        if (getArguments() != null) {
-            String title = getArguments().getString("recordingTitle");
-            String date = getArguments().getString("recordingDate");
-            recordingFilePath = getArguments().getString("recordingFilePath");
+        if (bundle != null) {
+            String title = bundle.getString("recordingTitle");
+            String date = bundle.getString("recordingDate");
             tvTitle.setText(title);
             tvDate.setText(date);
         }
 
-        DetailsViewPagerAdapter adapter = new DetailsViewPagerAdapter(this, recordingFilePath);
+        DetailsViewPagerAdapter adapter = new DetailsViewPagerAdapter(this, bundle);
         viewPager.setAdapter(adapter);
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {

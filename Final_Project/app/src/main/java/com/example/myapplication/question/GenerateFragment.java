@@ -45,6 +45,7 @@ public class GenerateFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
         recyclerView = view.findViewById(R.id.recentList);
         tvEmpty = view.findViewById(R.id.tv_empty);
 
@@ -54,9 +55,19 @@ public class GenerateFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         adapter.setOnItemClickListener(item -> {
+            // 1. 오디오 파일 경로를 가져옵니다.
+            String audioPath = item.getFilePath(); // 예: ".../file.m4a"
+
+            // 2. 오디오 경로를 텍스트 파일 경로로 변환합니다.
+            String textPath = audioPath.replaceAll("\\.m4a$", ".txt"); // 예: ".../file.txt"
+
+            // 3. (중요!) QuizActivity로 변환된 텍스트 파일 경로(textPath)를 넘깁니다.
             Intent intent = new Intent(getActivity(), QuizActivity.class);
-            intent.putExtra("file_title", item.getTitle());
-            intent.putExtra("file_path", item.getFilePath());
+            intent.putExtra("file_path", textPath); // ⬅️ audioPath 대신 textPath!
+
+            // (아마 title도 넘겨주고 있을 것입니다)
+            // intent.putExtra("file_title", item.getTitle());
+
             startActivity(intent);
         });
 
@@ -109,7 +120,7 @@ public class GenerateFragment extends Fragment {
         File oldAudioFile = new File(recording.getFilePath());
         File parentDir = oldAudioFile.getParentFile();
 
-        File newAudioFile = new File(parentDir, newName + ".m4a");
+        File newAudioFile = new File(parentDir, newName + ".txt");
 
         if (newAudioFile.exists()) {
             Toast.makeText(getContext(), "이미 존재하는 이름입니다.", Toast.LENGTH_SHORT).show();
@@ -170,7 +181,8 @@ public class GenerateFragment extends Fragment {
                     if (file.getName().endsWith(".m4a")) {
                         String title = file.getName().replace(".m4a", "");
                         String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
-                        recordingList.add(new Recording(title, date, 0, file.getAbsolutePath()));
+                        String filePath = file.getAbsolutePath();
+                        recordingList.add(new Recording(title, date, 0, filePath));
                     }
                 }
             }
