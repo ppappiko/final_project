@@ -67,6 +67,7 @@ public class HomeFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putString("recordingTitle", item.getTitle());
             bundle.putString("recordingDate", item.getDate());
+            bundle.putString("recordingFilePath", item.getFilePath());
             // 1. 오디오 파일 경로를 가져옵니다.
             String audioPath = item.getFilePath(); // 예: ".../file.m4a"
 

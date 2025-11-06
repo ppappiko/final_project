@@ -63,7 +63,7 @@ public class GenerateFragment extends Fragment {
 
             // 3. (중요!) QuizActivity로 변환된 텍스트 파일 경로(textPath)를 넘깁니다.
             Intent intent = new Intent(getActivity(), QuizActivity.class);
-            intent.putExtra("file_path", textPath); // ⬅️ audioPath 대신 textPath!
+            intent.putExtra("filePath", textPath); // ⬅️ audioPath 대신 textPath!
 
             // (아마 title도 넘겨주고 있을 것입니다)
             // intent.putExtra("file_title", item.getTitle());

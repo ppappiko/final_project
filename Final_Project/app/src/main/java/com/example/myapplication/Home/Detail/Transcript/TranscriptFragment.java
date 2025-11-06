@@ -76,6 +76,7 @@ public class TranscriptFragment extends Fragment {
 
         if (getArguments() != null) {
             filePath = getArguments().getString("filePath");
+
         }
 
         if (!loadExistingTranscript()) {
@@ -88,6 +89,7 @@ public class TranscriptFragment extends Fragment {
                 transcribeAudio(filePath);
             } else {
                 Toast.makeText(getContext(), "녹음 파일을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                Log.d("DEBUG_PATH", "transcriptFragment가 받은 경로: " + filePath);
             }
         });
     }
