@@ -45,7 +45,7 @@ public class QuizLoadingFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // 프래그먼트 생성 시, Bundle에서 파일 경로를 꺼냅니다.
         if (getArguments() != null) {
-            String filePath = getArguments().getString("file_path");
+            String filePath = getArguments().getString("filePath");
             Log.d("DEBUG_PATH", "Fragment가 받은 경로: " + filePath);
             if (filePath != null) {
                 // 파일 경로를 이용해 텍스트를 읽어옵니다.

@@ -15,7 +15,7 @@ public class QuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
 
-        String filePath = getIntent().getStringExtra("file_path");
+        String filePath = getIntent().getStringExtra("filePath");
 
         Log.d("DEBUG_PATH", "QuizActivity가 받은 경로: " + filePath);
 
@@ -25,7 +25,7 @@ public class QuizActivity extends AppCompatActivity {
 
             // 3. Bundle을 만들어 파일 경로를 담습니다.
             Bundle bundle = new Bundle();
-            bundle.putString("file_path", filePath);
+            bundle.putString("filePath", filePath);
 
             // 4. Fragment에 Bundle을 인자로 설정합니다.
             loadingFragment.setArguments(bundle);
