@@ -36,12 +36,16 @@ public class DetailsFragment extends Fragment {
         viewPager = view.findViewById(R.id.view_pager);
         TextView tvTitle = view.findViewById(R.id.tv_detail_title);
         TextView tvDate = view.findViewById(R.id.tv_detail_date);
-        Bundle bundle = getArguments();
 
         if (getArguments() != null) {
             String title = getArguments().getString("recordingTitle");
             String date = getArguments().getString("recordingDate");
             recordingFilePath = getArguments().getString("recordingFilePath");
+
+            // --- 누락되었던 코드 추가 ---
+            tvTitle.setText(title);
+            tvDate.setText(date);
+            // --------------------------
         }
 
         DetailsViewPagerAdapter adapter = new DetailsViewPagerAdapter(this, recordingFilePath);
@@ -83,7 +87,6 @@ public class DetailsFragment extends Fragment {
 
     public void updateRefreshButtonVisibility() {
         if (getActivity() instanceof MainActivity) {
-            // ViewPager2가 준비될 때까지 잠시 기다린 후 실행하여 NullPointerException 방지
             viewPager.post(() -> {
                 Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
                 boolean shouldShow = viewPager.getCurrentItem() == 0 && currentItem instanceof TranscriptFragment && ((TranscriptFragment) currentItem).isShowingResult();

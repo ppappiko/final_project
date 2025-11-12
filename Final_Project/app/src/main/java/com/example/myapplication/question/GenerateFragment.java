@@ -45,7 +45,6 @@ public class GenerateFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         recyclerView = view.findViewById(R.id.recentList);
         tvEmpty = view.findViewById(R.id.tv_empty);
 
@@ -55,25 +54,14 @@ public class GenerateFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         adapter.setOnItemClickListener(item -> {
-            // 1. 오디오 파일 경로를 가져옵니다.
-            String audioPath = item.getFilePath(); // 예: ".../file.m4a"
-
-            // 2. 오디오 경로를 텍스트 파일 경로로 변환합니다.
-            String textPath = audioPath.replaceAll("\\.m4a$", ".txt"); // 예: ".../file.txt"
-
-            // 3. (중요!) QuizActivity로 변환된 텍스트 파일 경로(textPath)를 넘깁니다.
             Intent intent = new Intent(getActivity(), QuizActivity.class);
-            intent.putExtra("filePath", textPath); // ⬅️ audioPath 대신 textPath!
-
-            // (아마 title도 넘겨주고 있을 것입니다)
-            // intent.putExtra("file_title", item.getTitle());
-
+            intent.putExtra("file_title", item.getTitle());
+            intent.putExtra("file_path", item.getFilePath());
             startActivity(intent);
         });
 
         adapter.setOnItemLongClickListener(item -> {
             final CharSequence[] options = {"이름 변경", "파일 삭제"};
-
             new AlertDialog.Builder(getContext())
                     .setTitle(item.getTitle())
                     .setItems(options, (dialog, which) -> {
@@ -93,6 +81,30 @@ public class GenerateFragment extends Fragment {
     public void onResume() {
         super.onResume();
         loadRecordingsFromStorage();
+    }
+
+    // MainActivity에서 호출할 수 있도록 public으로 변경
+    public void loadRecordingsFromStorage() {
+        recordingList.clear();
+        if (getContext() == null) return;
+        File recordingsDir = getContext().getExternalFilesDir(null);
+        if (recordingsDir != null && recordingsDir.exists()) {
+            File[] files = recordingsDir.listFiles();
+            if (files != null) {
+                Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+                for (File file : files) {
+                    if (file.getName().endsWith(".m4a")) {
+                        String title = file.getName().replace(".m4a", "");
+                        String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
+                        recordingList.add(new Recording(title, date, 0, file.getAbsolutePath()));
+                    }
+                }
+            }
+        }
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+        updateEmptyView();
     }
 
     private void showRenameDialog(final Recording recording) {
@@ -119,8 +131,7 @@ public class GenerateFragment extends Fragment {
     private void renameRecording(Recording recording, String newName) {
         File oldAudioFile = new File(recording.getFilePath());
         File parentDir = oldAudioFile.getParentFile();
-
-        File newAudioFile = new File(parentDir, newName + ".txt");
+        File newAudioFile = new File(parentDir, newName + ".m4a");
 
         if (newAudioFile.exists()) {
             Toast.makeText(getContext(), "이미 존재하는 이름입니다.", Toast.LENGTH_SHORT).show();
@@ -167,30 +178,6 @@ public class GenerateFragment extends Fragment {
 
         Toast.makeText(getContext(), "녹음 파일이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
         loadRecordingsFromStorage();
-    }
-
-    private void loadRecordingsFromStorage() {
-        recordingList.clear();
-        if (getContext() == null) return;
-        File recordingsDir = getContext().getExternalFilesDir(null);
-        if (recordingsDir != null && recordingsDir.exists()) {
-            File[] files = recordingsDir.listFiles();
-            if (files != null) {
-                Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
-                for (File file : files) {
-                    if (file.getName().endsWith(".m4a")) {
-                        String title = file.getName().replace(".m4a", "");
-                        String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
-                        String filePath = file.getAbsolutePath();
-                        recordingList.add(new Recording(title, date, 0, filePath));
-                    }
-                }
-            }
-        }
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
-        updateEmptyView();
     }
 
     private void updateEmptyView() {
