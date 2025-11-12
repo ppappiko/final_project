@@ -58,7 +58,6 @@ public class HomeFragment extends Fragment {
         tvEmpty = view.findViewById(R.id.tv_empty);
 
         adapter = new HomeRecyclerAdapter(recordingList);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
@@ -68,14 +67,6 @@ public class HomeFragment extends Fragment {
             bundle.putString("recordingTitle", item.getTitle());
             bundle.putString("recordingDate", item.getDate());
             bundle.putString("recordingFilePath", item.getFilePath());
-            // 1. 오디오 파일 경로를 가져옵니다.
-            String audioPath = item.getFilePath(); // 예: ".../file.m4a"
-
-            // 2. 오디오 경로를 텍스트 파일 경로로 변환합니다.
-            String textPath = audioPath.replaceAll("\\.m4a$", ".txt"); // 예: ".../file.txt"
-
-            // 3. (중요!) 변환된 텍스트 파일 경로(textPath)를 전달합니다.
-            bundle.putString("file_path", textPath);
             detailsFragment.setArguments(bundle);
 
             if (getActivity() instanceof MainActivity) {
@@ -97,7 +88,7 @@ public class HomeFragment extends Fragment {
                     .show();
         });
 
-        //loadRecordingsFromStorage(null);
+        loadRecordingsFromStorage(null);
     }
 
     @Override
@@ -115,57 +106,28 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadRecordingsFromStorage(final String query) {
+        recordingList.clear();
+        if (getContext() == null) return;
 
-        // (선택 사항: 로딩 중임을 표시, 예: progressBar.setVisibility(View.VISIBLE))
-
-        // 1. 새로운 백그라운드 스레드를 시작합니다.
-        new Thread(() -> {
-
-            // 2. 백그라운드 스레드에서만 사용할 임시 리스트를 만듭니다.
-            List<Recording> newRecordingList = new ArrayList<>();
-
-            if (getContext() == null) return;
-
-            File recordingsDir = getContext().getExternalFilesDir(null);
-            if (recordingsDir != null && recordingsDir.exists()) {
-
-                // 3. [백그라운드 작업 ①] 파일 목록 읽기
-                File[] files = recordingsDir.listFiles();
-
-                if (files != null) {
-                    // 4. [백그라운드 작업 ②] 파일 정렬
-                    Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
-
-                    // 5. [백그라운드 작업 ③] 파일 정보 스캔
-                    for (File file : files) {
-                        if (file.getName().endsWith(".m4a")) {
-                            String title = file.getName().replace(".m4a", "");
-
-                            if (query == null || query.isEmpty() || title.toLowerCase().contains(query.toLowerCase())) {
-                                String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
-                                // 임시 리스트에 추가
-                                newRecordingList.add(new Recording(title, date, 0, file.getAbsolutePath()));
-                            }
+        File recordingsDir = getContext().getExternalFilesDir(null);
+        if (recordingsDir != null && recordingsDir.exists()) {
+            File[] files = recordingsDir.listFiles();
+            if (files != null) {
+                Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+                for (File file : files) {
+                    if (file.getName().endsWith(".m4a")) {
+                        String title = file.getName().replace(".m4a", "");
+                        
+                        if (query == null || query.isEmpty() || title.toLowerCase().contains(query.toLowerCase())) {
+                            String date = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(file.lastModified()));
+                            recordingList.add(new Recording(title, date, 0, file.getAbsolutePath()));
                         }
                     }
                 }
             }
-
-            // 6. 모든 백그라운드 작업 완료 후, 결과를 메인 스레드(UI 스레드)로 전달
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-
-                    // 7. [메인 스레드] UI를 갱신합니다.
-                    recordingList.clear(); // 기존 목록을 지우고
-                    recordingList.addAll(newRecordingList); // 새 목록으로 교체
-
-                    adapter.notifyDataSetChanged(); // 어댑터 새로고침
-                    updateEmptyView(query); // 빈 화면 텍스트 업데이트
-
-                    // (선택 사항: 로딩 완료 표시, 예: progressBar.setVisibility(View.GONE))
-                });
-            }
-        }).start(); // 1-cont. 백그라운드 스레드 실행!
+        }
+        adapter.notifyDataSetChanged();
+        updateEmptyView(query);
     }
 
     private void showRenameDialog(final Recording recording) {

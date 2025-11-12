@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
@@ -20,7 +21,7 @@
             android:id="@+id/tv_item_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="프로젝트실무2"
+            tools:text="프로젝트실무2" 
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -32,7 +33,7 @@
             android:id="@+id/tv_item_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2025.07.10"
+            tools:text="2025.07.10" 
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_item_title"/>
@@ -41,7 +42,7 @@
             android:id="@+id/tv_item_problems"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="10문제"
+            tools:text="10문제" 
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_item_date"/>

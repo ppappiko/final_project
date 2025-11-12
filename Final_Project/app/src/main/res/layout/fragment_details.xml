@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,7 +11,7 @@
         android:id="@+id/tv_detail_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="프로젝트실무2"
+        tools:text="프로젝트실무2" 
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"/>
@@ -19,7 +20,7 @@
         android:id="@+id/tv_detail_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2025.07.10"
+        tools:text="2025.07.10" 
         android:layout_marginTop="4dp"/>
 
     <com.google.android.material.tabs.TabLayout
