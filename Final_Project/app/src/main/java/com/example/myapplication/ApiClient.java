@@ -8,19 +8,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ApiClient {
 
-    // The base URL is now managed in your app's build.gradle file.
-    // This allows for different URLs for debug and release builds.
-    //
-    // Example for build.gradle:
-    // android {
-    //     ...
-    //     defaultConfig {
-    //         ...
-    //         buildConfigField "String", "BASE_URL", "\"http://175.204.21.19:8080/\""
-    //     }
-    // }
-    //
-    // Remember to sync your project with Gradle files after making changes.
+    // ⚠️ 중요: 이 주소는 테스트 환경에 맞게 변경해야 합니다.
+    // 1. PC의 내부 IP 주소 사용: "http://192.168.x.x:8080/"
+    // 2. ngrok 사용: "https://xxxx-xxxx.ngrok-free.app/"
+    private static final String BASE_URL = "http://175.204.21.19:8080/"; // ⬅️ 본인 환경에 맞게 수정!
 
     private static volatile Retrofit retrofit = null;
 

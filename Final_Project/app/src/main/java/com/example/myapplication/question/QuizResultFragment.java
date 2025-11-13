@@ -1,6 +1,9 @@
 package com.example.myapplication.question;
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import com.example.myapplication.Home.Detail.Question.Question;
 import com.example.myapplication.R;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuizResultFragment extends Fragment {
@@ -26,9 +30,14 @@ public class QuizResultFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 1. 퀴즈 풀이 화면(QuizQuestionFragment)으로부터 "resultList"를 받습니다.
         if (getArguments() != null) {
+            // 2. "resultList"라는 키로 데이터를 받습니다. (이 키 이름이 일치해야 함)
             resultList = (List<Question>) getArguments().getSerializable("resultList");
+        }
+        // 3. (중요) null 방어 코드 추가
+        if (resultList == null) {
+            resultList = new ArrayList<>(); // ⬅️ null 대신 빈 리스트를 생성
+            Log.e(TAG, "resultList가 null로 전달되었습니다.");
         }
     }
 
