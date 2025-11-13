@@ -16,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.myapplication.Home.Detail.DetailsFragment;
 import com.example.myapplication.Home.HomeFragment;
@@ -41,19 +42,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initViews();
+        setupListeners();
+        setupFilePicker();
+
+        if (savedInstanceState == null) {
+            replaceFragment(new HomeFragment(), false); // Initial fragment, don't add to back stack
+        }
+    }
+
+    private void initViews() {
         bottomNav    = findViewById(R.id.bottomNav);
         btnNewRecord = findViewById(R.id.btnNewRecord);
         btnSearch    = findViewById(R.id.btnSearch);
         btnBell      = findViewById(R.id.btnBell);
         btnRefresh   = findViewById(R.id.btnRefresh);
+    }
 
-        filePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
-                uri -> {
-                    if (uri != null) {
-                        copyFileToAppStorageFromUri(uri);
-                    }
-                });
-
+    private void setupListeners() {
         btnSearch.setOnClickListener(v -> showSearchDialog());
         btnBell.setOnClickListener(v -> Toast.makeText(this, "알림 클릭", Toast.LENGTH_SHORT).show());
 
@@ -65,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnNewRecord.setOnClickListener(v -> showUploadOrRecordDialog());
-
-        replaceFragment(new HomeFragment());
 
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
@@ -82,11 +86,21 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (selectedFragment != null) {
-                replaceFragment(selectedFragment);
+                // Don't add root fragments to the back stack
+                replaceFragment(selectedFragment, false);
                 return true;
             }
             return false;
         });
+    }
+
+    private void setupFilePicker() {
+        filePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        copyFileToAppStorageFromUri(uri);
+                    }
+                });
     }
 
     private void showUploadOrRecordDialog() {
@@ -109,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "파일 이름을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         if (!sourceFileName.toLowerCase().endsWith(".m4a")) {
             Toast.makeText(this, "m4a 형식의 오디오 파일만 가져올 수 있습니다.", Toast.LENGTH_LONG).show();
             return;
@@ -122,7 +136,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "이미 동일한 이름의 파일이 존재합니다.", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        
+        // Consider running this in a background thread to avoid blocking the UI.
         try (InputStream in = getContentResolver().openInputStream(sourceUri); OutputStream out = new FileOutputStream(destFile)) {
             byte[] buf = new byte[1024];
             int len;
@@ -131,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
             }
             Toast.makeText(this, "파일을 성공적으로 가져왔습니다.", Toast.LENGTH_SHORT).show();
 
+            // Consider using a ViewModel and LiveData to communicate between fragments and activity.
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
             if (currentFragment instanceof HomeFragment) {
                 ((HomeFragment) currentFragment).filterRecordingsByContent(null);
@@ -181,23 +197,21 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void replaceFragment(Fragment fragment) {
-        // HomeFragment일 때만 '새로운 녹음' 버튼을 표시
-        if (fragment instanceof HomeFragment) {
-            btnNewRecord.setVisibility(View.VISIBLE);
-        } else {
-            btnNewRecord.setVisibility(View.GONE);
-        }
-        
-        // DetailsFragment가 아닐 때는 항상 새로고침 버튼 숨김
+    public void replaceFragment(Fragment fragment, boolean addToBackStack) {
+        // Show/hide the 'New Record' button based on the fragment type.
+        btnNewRecord.setVisibility(fragment instanceof HomeFragment ? View.VISIBLE : View.GONE);
+
+        // Hide the refresh button if the fragment is not DetailsFragment.
         if (!(fragment instanceof DetailsFragment)) {
             btnRefresh.setVisibility(View.GONE);
         }
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_frame, fragment)
-                .addToBackStack(null)
-                .commit();
+        var transaction = getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_frame, fragment);
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        transaction.commit();
     }
 
     public void showRefreshButton(boolean show) {
