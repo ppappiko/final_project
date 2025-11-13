@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment {
             detailsFragment.setArguments(bundle);
 
             if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).replaceFragment(detailsFragment);
+                ((MainActivity) getActivity()).replaceFragment(detailsFragment, true);
             }
         });
 

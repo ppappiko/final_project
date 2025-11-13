@@ -1,0 +1,4 @@
+# 예시: C:\Users\MyUser\AppData\Local\Android\Sdk 경로일 경우
+
+sdk.dir=C:\\Users\\pohye\\AppData\\Local\\Android\\Sdk
+

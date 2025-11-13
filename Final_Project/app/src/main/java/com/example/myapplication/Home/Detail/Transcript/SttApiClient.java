@@ -1,52 +1,39 @@
-package com.example.myapplication;
+package com.example.myapplication.Home.Detail.Transcript;
+
+import com.example.myapplication.BuildConfig;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
+import java.util.concurrent.TimeUnit;
 
-public class ApiClient {
+public class SttApiClient {
 
-    // The base URL is now managed in your app's build.gradle file.
-    // This allows for different URLs for debug and release builds.
-    //
-    // Example for build.gradle:
-    // android {
-    //     ...
-    //     defaultConfig {
-    //         ...
-    //         buildConfigField "String", "BASE_URL", "\"http://175.204.21.19:8080/\""
-    //     }
-    // }
-    //
-    // Remember to sync your project with Gradle files after making changes.
-
+    private static final String STT_BASE_URL = "http://34.50.41.99:8000/";
     private static volatile Retrofit retrofit = null;
 
     public static Retrofit getClient() {
-        // Use double-checked locking for thread safety.
         if (retrofit == null) {
-            synchronized (ApiClient.class) {
+            synchronized (SttApiClient.class) {
                 if (retrofit == null) {
-                    // Create a logging interceptor to see request and response logs.
                     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-                    // Show logs only in debug builds.
                     if (BuildConfig.DEBUG) {
                         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
                     } else {
                         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
                     }
 
-                    // Create a custom OkHttpClient and add the logging interceptor.
                     OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                            .connectTimeout(300, TimeUnit.SECONDS) // 타임아웃 5분으로 증가
+                            .writeTimeout(300, TimeUnit.SECONDS)   // 타임아웃 5분으로 증가
+                            .readTimeout(300, TimeUnit.SECONDS)    // 타임아웃 5분으로 증가
                             .addInterceptor(loggingInterceptor)
                             .build();
 
                     retrofit = new Retrofit.Builder()
-                            .baseUrl(BuildConfig.BASE_URL) // Use the URL from BuildConfig
+                            .baseUrl(STT_BASE_URL)
                             .client(okHttpClient)
-                            .addConverterFactory(ScalarsConverterFactory.create())
                             .addConverterFactory(GsonConverterFactory.create())
                             .build();
                 }
