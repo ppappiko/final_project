@@ -55,8 +55,18 @@ public class GenerateFragment extends Fragment {
 
         adapter.setOnItemClickListener(item -> {
             Intent intent = new Intent(getActivity(), QuizActivity.class);
+
+            // 1. 오디오 파일 경로(.m4a)를 가져옵니다.
+            String audioPath = item.getFilePath();
+
+            // 2. [핵심] 오디오 경로를 텍스트 파일 경로(.txt)로 변환합니다.
+            String textPath = audioPath.replaceAll("\\.m4a$", ".txt");
+
             intent.putExtra("file_title", item.getTitle());
-            intent.putExtra("file_path", item.getFilePath());
+
+            // 3. [수정] 변환된 텍스트 파일 경로(textPath)를 전달합니다.
+            intent.putExtra("filePath", textPath);
+
             startActivity(intent);
         });
 
