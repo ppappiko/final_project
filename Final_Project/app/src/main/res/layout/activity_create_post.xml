@@ -1,56 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".community.CreatePostActivity">
+    android:padding="16dp">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar_create_post"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:title="새 게시물 작성" />
-
-    <Spinner
-        android:id="@+id/spinner_post_category"
+    <EditText
+        android:id="@+id/et_post_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:prompt="@string/category_prompt" />
+        android:hint="제목" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_post_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="제목" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
+    <EditText
+        android:id="@+id/et_post_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:gravity="top"
+        android:hint="내용을 입력하세요..." />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_post_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top"
-            android:hint="내용을 입력하세요." />
-    </com.google.android.material.textfield.TextInputLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btn_attach_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="파일 첨부" />
+
+        <TextView
+            android:id="@+id/tv_attached_file_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="첨부된 파일 없음" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_submit_post"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="작성 완료" />
+        android:text="등록하기" />
 
 </LinearLayout>

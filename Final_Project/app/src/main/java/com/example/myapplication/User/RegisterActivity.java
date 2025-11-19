@@ -48,10 +48,8 @@ public class RegisterActivity extends AppCompatActivity {
         etName = findViewById(R.id.et_name);
         etPhone = findViewById(R.id.et_phone);
 
-        // Retrofit 클라이언트를 통해 UserService 인터페이스 구현체 생성
-        userService = ApiClient.getClient().create(UserService.class);
-
-
+        // Retrofit 클라이언트를 통해 UserService 인터페이스 구현체 생성 (올바른 메소드 사용)
+        userService = ApiClient.getUserService();
 
         // 1. 닉네임 중복 확인 버튼
         btnCheckNickname.setOnClickListener(v -> {
@@ -115,10 +113,8 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(this, "이메일 인증을 완료해주세요.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // TODO: 비밀번호와 비밀번호 확인이 일치하는지 등 추가 검증 로직 필요
 
-            // 모든 검증 통과 시, 실제 회원가입 요청
-            String username = etNickname.getText().toString(); // 닉네임을 username으로 사용
+            String username = etNickname.getText().toString();
             String password = etPassword.getText().toString();
             String name = etName.getText().toString();
             String phone = etPhone.getText().toString();
@@ -134,7 +130,6 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    // 반복적인 Callback 코드를 줄이기 위한 헬퍼 메소드
     private Callback<Map<String, String>> createCallback(String successMsg, String errorMsg, Runnable onSuccess, Runnable onFailure) {
         return new Callback<Map<String, String>>() {
             @Override

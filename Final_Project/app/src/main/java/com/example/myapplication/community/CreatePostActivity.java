@@ -1,100 +1,115 @@
 package com.example.myapplication.community;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.example.myapplication.ApiClient;
 import com.example.myapplication.R;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.Gson;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CreatePostActivity extends AppCompatActivity {
 
-    private Spinner categorySpinner;
-    private TextInputEditText titleEditText;
-    private TextInputEditText contentEditText;
-    private Button submitButton;
-    private ApiService apiService;
+    private EditText etTitle, etContent;
+    private Button btnAttachFile, btnSubmit;
+    private TextView tvAttachedFileName;
+
+    private String attachedFilePath = null;
+
+    private final ActivityResultLauncher<Intent> selectFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    attachedFilePath = result.getData().getStringExtra("selected_file_path");
+                    String attachedFileName = result.getData().getStringExtra("selected_file_name");
+                    tvAttachedFileName.setText(attachedFileName);
+                }
+            });
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
 
-        // 툴바 설정
-        Toolbar toolbar = findViewById(R.id.toolbar_create_post);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // 뒤로가기 버튼 활성화
+        etTitle = findViewById(R.id.et_post_title);
+        etContent = findViewById(R.id.et_post_content);
+        btnAttachFile = findViewById(R.id.btn_attach_file);
+        btnSubmit = findViewById(R.id.btn_submit_post);
+        tvAttachedFileName = findViewById(R.id.tv_attached_file_name);
 
-        // 뷰 초기화
-        categorySpinner = findViewById(R.id.spinner_post_category);
-        titleEditText = findViewById(R.id.et_post_title);
-        contentEditText = findViewById(R.id.et_post_content);
-        submitButton = findViewById(R.id.btn_submit_post);
+        btnAttachFile.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SelectAttachmentActivity.class);
+            selectFileLauncher.launch(intent);
+        });
 
-        // 스피너 설정
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.post_categories, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categorySpinner.setAdapter(adapter);
-
-        // Retrofit 서비스 초기화
-        apiService = ApiClient.getClient().create(ApiService.class);
-
-        // 작성 완료 버튼 클릭 리스너
-        submitButton.setOnClickListener(v -> submitPost());
+        btnSubmit.setOnClickListener(v -> submitPost());
     }
 
     private void submitPost() {
-        String category = categorySpinner.getSelectedItem().toString();
-        String title = titleEditText.getText().toString().trim();
-        String content = contentEditText.getText().toString().trim();
+        String title = etTitle.getText().toString();
+        String content = etContent.getText().toString();
 
-        // 입력 유효성 검사
-        if (title.isEmpty()) {
-            Toast.makeText(this, "제목을 입력해주세요.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (content.isEmpty()) {
-            Toast.makeText(this, "내용을 입력해주세요.", Toast.LENGTH_SHORT).show();
+        if (title.isEmpty() || content.isEmpty()) {
+            Toast.makeText(this, "제목과 내용을 모두 입력해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 서버로 전송할 데이터 생성
-        PostRequest postRequest = new PostRequest(category, title, content);
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("title", title);
+        postData.put("content", content);
+        postData.put("author", "test_user");
 
-        // API 호출
-        Call<Void> call = apiService.createPost(postRequest);
+        Gson gson = new Gson();
+        String postJson = gson.toJson(postData);
+        RequestBody postBody = RequestBody.create(postJson, MediaType.parse("application/json; charset=utf-8"));
+
+        Call<Void> call;
+
+        if (attachedFilePath != null) {
+            File file = new File(attachedFilePath);
+            String fileType = attachedFilePath.endsWith(".txt") ? "text/plain" : "audio/m4a";
+            RequestBody fileReqBody = RequestBody.create(file, MediaType.parse(fileType));
+            MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", file.getName(), fileReqBody);
+            call = ApiClient.getApiService().createPost(postBody, filePart);
+        } else {
+            call = ApiClient.getApiService().createPost(postBody);
+        }
+
         call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(CreatePostActivity.this, "게시물이 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show();
-                    finish(); // 액티비티 종료
+                    finish();
                 } else {
-                    Toast.makeText(CreatePostActivity.this, "오류가 발생했습니다: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CreatePostActivity.this, "게시물 등록에 실패했습니다. 코드: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                 Toast.makeText(CreatePostActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish(); // 뒤로가기 버튼 클릭 시 액티비티 종료
-        return true;
     }
 }

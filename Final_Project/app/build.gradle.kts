@@ -14,14 +14,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // The base URL for network requests.
-        // Using buildConfigField allows you to define different URLs for debug and release builds.
+        
         buildConfigField("String", "BASE_URL", "\"http://175.204.21.19:8080/\"")
-    }
-
-    buildFeatures {
-        buildConfig = true
     }
 
     buildTypes {
@@ -37,6 +31,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -51,15 +49,8 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0") // Added for network logging
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0") // 로깅 인터셉터 라이브러리 추가
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-
-    // Android Jetpack libraries to improve app architecture
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation("androidx.fragment:fragment-ktx:1.7.0")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
 }

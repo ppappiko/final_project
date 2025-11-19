@@ -1,21 +1,19 @@
 package com.example.myapplication;
 
+import com.example.myapplication.User.UserService;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ApiClient {
 
-    // ⚠️ 중요: 이 주소는 테스트 환경에 맞게 변경해야 합니다.
-    // 1. PC의 내부 IP 주소 사용: "http://192.168.x.x:8080/"
-    // 2. ngrok 사용: "https://xxxx-xxxx.ngrok-free.app/"
-    private static final String BASE_URL = "http://175.204.21.19:8080/"; // ⬅️ 본인 환경에 맞게 수정!
+    private static Retrofit retrofit = null;
+    private static ApiService apiService = null;
+    private static UserService userService = null; // UserService 인스턴스 추가
 
-    private static volatile Retrofit retrofit = null;
 
     /**
      * 타임아웃을 60초로 늘린 OkHttpClient 객체를 생성합니다.
@@ -58,7 +56,32 @@ public class ApiClient {
                             .build();
                 }
             }
+
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .addInterceptor(loggingInterceptor)
+                    .build();
+
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(BuildConfig.BASE_URL)
+                    .client(okHttpClient)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
         }
         return retrofit;
+    }
+
+    public static ApiService getApiService() {
+        if (apiService == null) {
+            apiService = getClient().create(ApiService.class);
+        }
+        return apiService;
+    }
+
+    // UserService를 반환하는 공개 메소드 추가
+    public static UserService getUserService() {
+        if (userService == null) {
+            userService = getClient().create(UserService.class);
+        }
+        return userService;
     }
 }

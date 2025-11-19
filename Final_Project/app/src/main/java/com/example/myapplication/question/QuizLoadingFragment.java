@@ -44,6 +44,8 @@ public class QuizLoadingFragment extends Fragment {
     private UserService userService;
     private ProgressBar progressBar;
 
+
+    private String textFromFile = ""; 
     private String txtFilePath;
     private String recordingKey;
     private String authToken;
@@ -87,6 +89,7 @@ public class QuizLoadingFragment extends Fragment {
             return;
         }
 
+
         // (2) [500/403 해결] 토큰부터 로드
         if (!loadAuthToken()) {
             goToLogin(); // 토큰 없으면 로그인 화면으로
@@ -109,6 +112,7 @@ public class QuizLoadingFragment extends Fragment {
      */
     private void checkQuestionsOnServer() {
         progressBar.setVisibility(View.VISIBLE);
+
 
         Call<Map<String, List<Question>>> call = userService.getExistingQuestions(authToken, recordingKey);
         call.enqueue(new Callback<Map<String, List<Question>>>() {
@@ -222,6 +226,10 @@ public class QuizLoadingFragment extends Fragment {
 
     // --- (이하 헬퍼 메소드들은 기존과 동일) ---
 
+    private String readTextFromFile(String filePath) {
+        File file = new File(filePath);
+        StringBuilder text = new StringBuilder();
+
     /** [수정됨] 퀴즈 시작 화면으로 이동할 때, "filePath"도 함께 전달 */
     private void goToSuccessScreen(List<Question> questionList) {
         if (questionList == null || questionList.isEmpty()) { /* (오류 처리) */ return; }
@@ -276,4 +284,5 @@ public class QuizLoadingFragment extends Fragment {
         }
         return text.toString();
     }
+
 }

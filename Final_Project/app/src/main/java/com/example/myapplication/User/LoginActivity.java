@@ -41,8 +41,8 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btn_login);
         btnToRegister = findViewById(R.id.btn_to_register); // 2. 회원가입 버튼 초기화)
 
-        // 2. Retrofit 클라이언트를 통해 UserService 인터페이스 구현체 생성
-        userService = ApiClient.getClient().create(UserService.class);
+        // 2. Retrofit 클라이언트를 통해 UserService 인터페이스 구현체 생성 (올바른 메소드 사용)
+        userService = ApiClient.getUserService();
 
         // 3. 로그인 버튼 클릭 리스너 설정
         btnLogin.setOnClickListener(v -> {
@@ -83,8 +83,6 @@ public class LoginActivity extends AppCompatActivity {
 
                         // 3. 로그인 화면은 종료하여 뒤로가기 버튼으로 돌아올 수 없게 함
                         finish();
-
-                        // --- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ ---
 
                     } else {
                         // 로그인 실패 (HTTP 4xx, 5xx)
