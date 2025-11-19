@@ -33,11 +33,9 @@ public class CommunityFragment extends Fragment {
         ViewPager2 viewPager = view.findViewById(R.id.community_view_pager);
         FloatingActionButton fab = view.findViewById(R.id.fab_create_post);
 
-        // 어댑터 설정
         CommunityViewPagerAdapter adapter = new CommunityViewPagerAdapter(this);
         viewPager.setAdapter(adapter);
 
-        // 탭과 뷰페이저 연결
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
@@ -52,9 +50,9 @@ public class CommunityFragment extends Fragment {
             }
         }).attach();
 
-        // 플로팅 액션 버튼 클릭 리스너
+        // 플로팅 액션 버튼 클릭 시, 게시물 작성 액티비티 실행
         fab.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), CreatePostActivity.class);
+            Intent intent = new Intent(getContext(), CreatePostActivity.class);
             startActivity(intent);
         });
     }

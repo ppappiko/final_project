@@ -15,21 +15,21 @@ import java.util.List;
 public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapter.ViewHolder> {
 
     private final List<Recording> recordingList;
+    private OnItemClickListener clickListener;
+    private OnItemLongClickListener longClickListener;
 
-    // --- 클릭 리스너 인터페이스 ---
     public interface OnItemClickListener {
         void onItemClick(Recording item);
     }
-    private OnItemClickListener clickListener;
+
+    public interface OnItemLongClickListener {
+        void onItemLongClick(Recording item);
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.clickListener = listener;
     }
 
-    // --- 길게 누르기 리스너 인터페이스 ---
-    public interface OnItemLongClickListener {
-        void onItemLongClick(Recording item);
-    }
-    private OnItemLongClickListener longClickListener;
     public void setOnItemLongClickListener(OnItemLongClickListener listener) {
         this.longClickListener = listener;
     }
@@ -57,21 +57,33 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapte
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvTitle;
-        private final TextView tvDate;
-        private final TextView tvProblems;
+        private final TextView tvTitle, tvDate, tvItemType;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tv_item_title);
             tvDate = itemView.findViewById(R.id.tv_item_date);
-            tvProblems = itemView.findViewById(R.id.tv_item_problems);
+            tvItemType = itemView.findViewById(R.id.tv_item_type); // ID 변경
         }
 
         public void bind(final Recording item, final OnItemClickListener clickListener, final OnItemLongClickListener longClickListener) {
             tvTitle.setText(item.getTitle());
             tvDate.setText(item.getDate());
-            tvProblems.setText(item.getProblemCount() + "문제");
+
+            // 파일 경로를 기반으로 파일 타입 설정
+            if (item.getFilePath() != null) {
+                if (item.getFilePath().toLowerCase().endsWith(".m4a")) {
+                    tvItemType.setText("오디오");
+                    tvItemType.setVisibility(View.VISIBLE);
+                } else if (item.getFilePath().toLowerCase().endsWith(".txt")) {
+                    tvItemType.setText("텍스트");
+                    tvItemType.setVisibility(View.VISIBLE);
+                } else {
+                    tvItemType.setVisibility(View.GONE);
+                }
+            } else {
+                tvItemType.setVisibility(View.GONE);
+            }
 
             itemView.setOnClickListener(v -> {
                 if (clickListener != null) {
@@ -79,11 +91,10 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapte
                 }
             });
 
-            // 길게 누르기 리스너 설정
             itemView.setOnLongClickListener(v -> {
                 if (longClickListener != null) {
                     longClickListener.onItemLongClick(item);
-                    return true; // 이벤트를 소비했음을 알림
+                    return true;
                 }
                 return false;
             });

@@ -21,7 +21,7 @@
             android:id="@+id/tv_item_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="프로젝트실무2" 
+            tools:text="프로젝트실무2"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -33,17 +33,25 @@
             android:id="@+id/tv_item_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="2025.07.10" 
+            tools:text="2025.07.10"
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_item_title"/>
+            app:layout_constraintTop_toBottomOf="@+id/tv_item_title"/>
 
+        <!-- 파일 종류를 표시할 태그 (ID 및 디자인 변경) -->
         <TextView
-            android:id="@+id/tv_item_problems"
+            android:id="@+id/tv_item_type" 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="10문제" 
             android:layout_marginTop="4dp"
+            android:background="#E9ECEF" 
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textColor="#495057"
+            android:textSize="12sp"
+            tools:text="오디오"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_item_date"/>
 
