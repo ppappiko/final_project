@@ -1,5 +1,7 @@
 package com.example.myapplication.Home.Detail.Question;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -9,8 +11,11 @@ import java.util.List;
  */
 public class Question implements Serializable {
 
+    @SerializedName(value = "questionText", alternate = {"question", "question_text"})
     private String questionText;
+    @SerializedName("options")
     private List<String> options;
+    @SerializedName(value = "correctAnswerIndex", alternate = {"answer", "correct_answer"})
     private int correctAnswerIndex;
 
     // ▼ (퀴즈 진행 중 사용자가 선택한 답을 저장) ▼
