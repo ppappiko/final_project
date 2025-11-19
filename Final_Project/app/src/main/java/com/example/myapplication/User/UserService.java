@@ -35,12 +35,21 @@ public interface UserService {
     Call<Map<String, String>> checkNickname(@Body Map<String, String> nickname);
 
     /**
-     * [수정됨] POST: 문제 생성 요청 (인증 토큰 추가)
+     * POST: [생성 전용] 서버에 "새로운" 문제 생성을 요청
      */
     @POST("/ai/generate-questions")
     Call<Map<String, List<Question>>> generateQuestions(
-            @Header("Authorization") String authToken, // ⬅️ (이 부분은 이미 수정했었음)
-            @Body Map<String, String> requestBody
+            @Header("Authorization") String authToken,
+            @Body Map<String, String> requestBody // (text, recordingKey, count 포함)
+    );
+
+    /**
+     * GET: [조회 전용] 서버 DB에 저장된 문제가 있는지 확인
+     */
+    @GET("/ai/questions/{recordingKey}")
+    Call<Map<String, List<Question>>> getExistingQuestions(
+            @Header("Authorization") String authToken,
+            @Path("recordingKey") String recordingKey
     );
 
     /**
