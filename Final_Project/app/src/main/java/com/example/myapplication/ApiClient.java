@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import com.example.myapplication.User.UserService;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -13,13 +14,47 @@ public class ApiClient {
     private static ApiService apiService = null;
     private static UserService userService = null; // UserService 인스턴스 추가
 
-    private static Retrofit getClient() {
+
+    /**
+     * 타임아웃을 60초로 늘린 OkHttpClient 객체를 생성합니다.
+     */
+    private static OkHttpClient createOkHttpClient() {
+        return new OkHttpClient.Builder()
+                // 1. 서버 연결 시간 (60초)
+                .connectTimeout(300, TimeUnit.SECONDS)
+                // 2. 서버가 데이터를 읽는 시간 (60초) - AI 응답 대기
+                .readTimeout(300, TimeUnit.SECONDS)
+                // 3. 앱이 서버로 데이터를 쓰는 시간 (60초)
+                .writeTimeout(300, TimeUnit.SECONDS)
+                .build();
+    }
+
+    public static Retrofit getClient() {
+        // Use double-checked locking for thread safety.
         if (retrofit == null) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            if (BuildConfig.DEBUG) {
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            } else {
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
+            synchronized (ApiClient.class) {
+                if (retrofit == null) {
+                    // Create a logging interceptor to see request and response logs.
+                    HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+                    // Show logs only in debug builds.
+                    if (BuildConfig.DEBUG) {
+                        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+                    } else {
+                        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
+                    }
+
+                    // Create a custom OkHttpClient and add the logging interceptor.
+                    OkHttpClient okHttpClient = createOkHttpClient();
+
+
+
+                    retrofit = new Retrofit.Builder()
+                            .baseUrl(BuildConfig.BASE_URL) // Use the URL from BuildConfig
+                            .client(okHttpClient)
+                            .addConverterFactory(ScalarsConverterFactory.create())
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build();
+                }
             }
 
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
