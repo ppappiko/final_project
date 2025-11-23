@@ -1,10 +1,13 @@
 package com.example.myapplication.community;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,12 +15,16 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.ApiClient;
 import com.example.myapplication.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// 모든 게시판 프래그먼트의 부모 클래스
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public abstract class BaseBoardFragment extends Fragment {
 
     protected RecyclerView recyclerView;
@@ -28,45 +35,66 @@ public abstract class BaseBoardFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 공통 레이아웃 사용
-        return inflater.inflate(R.layout.fragment_board, container, false);
+        return inflater.inflate(R.layout.fragment_board, container, false); // fragment_board.xml 필요
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerView = view.findViewById(R.id.board_recycler_view);
+        recyclerView = view.findViewById(R.id.board_recycler_view); // XML ID 확인 필요
         tvEmpty = view.findViewById(R.id.tv_board_empty);
 
         setupRecyclerView();
-        loadDummyData();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 화면이 보일 때마다 서버에서 최신 글을 불러옴
+        loadPostsFromServer();
     }
 
     private void setupRecyclerView() {
-        adapter = new PostAdapter(postList);
+        adapter = new PostAdapter(postList); // PostAdapter는 기존 것 사용 (Post 객체 필드명만 맞으면 됨)
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        // TODO: 아이템 클릭 시 게시물 상세 화면으로 이동하는 로직 추가 예정
-        adapter.setOnItemClickListener(post -> {
-            // Intent to PostDetailActivity
-        });
+        // 클릭 이벤트 등은 여기서 처리
     }
 
-    // 임시 더미 데이터 로드
-    private void loadDummyData() {
-        postList.clear();
-        for (int i = 1; i <= 10; i++) {
-            postList.add(new Post(
-                    getBoardName() + " 게시물 제목 " + i,
-                    "이것은 " + getBoardName() + " 게시물의 내용 미리보기입니다.",
-                    "작성자 " + i,
-                    i + "시간 전"
-            ));
+    // ★ 서버에서 데이터 로드 ★
+    private void loadPostsFromServer() {
+        // 1. 토큰 가져오기
+        SharedPreferences prefs = getActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = prefs.getString("jwt_token", null);
+
+        if (token == null) {
+            // 토큰이 없으면(비로그인) 처리
+            return;
         }
-        updateEmptyView();
-        adapter.notifyDataSetChanged();
+
+        // 2. API 호출
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        // getCategory()를 통해 현재 프래그먼트의 카테고리(FREE, QNA 등)를 보냄
+        Call<List<Post>> call = apiService.getPosts("Bearer " + token, getCategory());
+
+        call.enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    postList.clear();
+                    postList.addAll(response.body());
+                    adapter.notifyDataSetChanged();
+                    updateEmptyView();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                Toast.makeText(getContext(), "목록 불러오기 실패", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateEmptyView() {
@@ -79,6 +107,6 @@ public abstract class BaseBoardFragment extends Fragment {
         }
     }
 
-    // 각 자식 프래그먼트가 자신의 게시판 이름을 반환하도록 함
-    protected abstract String getBoardName();
+    // ★ 중요: 자식 프래그먼트들이 구현해야 할 메소드 (서버용 카테고리 코드 반환) ★
+    protected abstract String getCategory();
 }

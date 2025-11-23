@@ -1,7 +1,5 @@
 package com.example.myapplication.question;
 
-import static android.content.ContentValues.TAG;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -41,16 +39,16 @@ import retrofit2.Response;
 
 public class QuizLoadingFragment extends Fragment {
 
+    private static final String TAG = "QuizLoadingFragment";
+
     private UserService userService;
     private ProgressBar progressBar;
 
-
-    private String textFromFile = ""; 
     private String txtFilePath;
     private String recordingKey;
     private String authToken;
-    private int questionCount = 5; // (기본값)
-    private boolean forceRegenerate = false; // (다시 만들기 플래그)
+    private int questionCount = 5;
+    private boolean forceRegenerate = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,13 +56,11 @@ public class QuizLoadingFragment extends Fragment {
 
         if (getArguments() != null) {
             txtFilePath = getArguments().getString("filePath");
-            // "다시 만들기"로 진입 시, 개수와 플래그를 받음
             questionCount = getArguments().getInt("questionCount", 5);
             forceRegenerate = getArguments().getBoolean("forceRegenerate", false);
         }
 
         if (txtFilePath != null && !txtFilePath.isEmpty()) {
-            // (1) .txt 경로에서 고유 키(파일 이름) 추출
             recordingKey = txtFilePath.substring(txtFilePath.lastIndexOf('/') + 1)
                     .replace(".txt", "");
         }
@@ -89,49 +85,35 @@ public class QuizLoadingFragment extends Fragment {
             return;
         }
 
-
-        // (2) [500/403 해결] 토큰부터 로드
         if (!loadAuthToken()) {
-            goToLogin(); // 토큰 없으면 로그인 화면으로
+            goToLogin();
             return;
         }
 
-        // (3) [핵심 로직] DB에 문제가 있는지 "먼저 확인"
-        // [핵심 로직]
         if (forceRegenerate) {
-            // 1. [다시 만들기] -> DB 조회(GET) 건너뛰고 바로 파일 읽기
             readAndGenerateQuestions(questionCount);
         } else {
-            // 2. [일반 입장] -> DB 조회(GET)부터 시작
             checkQuestionsOnServer();
         }
     }
 
-    /**
-     * [신규] API 1: 서버에 저장된 문제가 있는지 확인 (Cache Check)
-     */
     private void checkQuestionsOnServer() {
         progressBar.setVisibility(View.VISIBLE);
-
 
         Call<Map<String, List<Question>>> call = userService.getExistingQuestions(authToken, recordingKey);
         call.enqueue(new Callback<Map<String, List<Question>>>() {
             @Override
             public void onResponse(Call<Map<String, List<Question>>> call, Response<Map<String, List<Question>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // 4-A. [Cache Hit] 200 OK. DB에 문제가 있었음
                     List<Question> questionList = response.body().get("questions");
-                    Log.d("QuizLoading", "DB에서 " + questionList.size() + "개의 문제를 로드했습니다.");
-                    goToSuccessScreen(questionList); // -> 바로 퀴즈 시작
+                    Log.d(TAG, "DB에서 " + questionList.size() + "개의 문제를 로드했습니다.");
+                    goToSuccessScreen(questionList);
 
                 } else if (response.code() == 404) {
-                    // 4-B. [Cache Miss] 404 Not Found. DB에 문제가 없음
-                    Log.d("QuizLoading", "DB에 문제가 없어 새로 생성합니다.");
-                    // -> "몇 문제 생성할지" 묻는 안내창 띄우기
+                    Log.d(TAG, "DB에 문제가 없어 새로 생성합니다.");
                     showQuestionCountDialog();
 
                 } else {
-                    // 4-C. (403, 500 등) 기타 오류
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "문제 조회 실패: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
@@ -145,16 +127,13 @@ public class QuizLoadingFragment extends Fragment {
         });
     }
 
-    /**
-     * [신규] DB에 문제가 없을 때만 "문제 생성 개수" 묻는 안내창 띄우기
-     */
     private void showQuestionCountDialog() {
         if (getContext() == null) return;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("문제 생성");
         builder.setMessage("DB에 저장된 문제가 없습니다.\n새로 생성할 문제 개수를 입력하세요.");
-        builder.setCancelable(false); // (뒤로가기/바깥 터치로 닫기 방지)
+        builder.setCancelable(false);
 
         final EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -167,7 +146,6 @@ public class QuizLoadingFragment extends Fragment {
             catch (NumberFormatException e) { count = 5; }
             if (count <= 0) count = 5;
 
-            // API 2 (POST) 호출
             readAndGenerateQuestions(count);
         });
         builder.setNegativeButton("취소", (dialog, which) -> {
@@ -177,13 +155,9 @@ public class QuizLoadingFragment extends Fragment {
         builder.show();
     }
 
-    /**
-     * [신규] API 2: .txt 파일을 읽고, 서버에 "새로운" 문제 생성을 요청
-     */
     private void readAndGenerateQuestions(int count) {
-        progressBar.setVisibility(View.VISIBLE); // 다시 로딩바 표시
+        progressBar.setVisibility(View.VISIBLE);
 
-        // [ANR 해결] 파일 읽기를 백그라운드 스레드에서 실행
         new Thread(() -> {
             String textFromFile = readTextFromFile(txtFilePath);
 
@@ -195,22 +169,20 @@ public class QuizLoadingFragment extends Fragment {
                         return;
                     }
 
-                    // 6. [500 해결] requestBody에 count, text, key 모두 담기
                     HashMap<String, String> requestBody = new HashMap<>();
                     requestBody.put("text", textFromFile);
                     requestBody.put("recordingKey", recordingKey);
                     requestBody.put("count", String.valueOf(count));
 
-                    // 7. API 2 (POST) 호출
                     Call<Map<String, List<Question>>> call = userService.generateQuestions(authToken, requestBody);
                     call.enqueue(new Callback<Map<String, List<Question>>>() {
                         @Override
                         public void onResponse(Call<Map<String, List<Question>>> call, Response<Map<String, List<Question>>> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 List<Question> questionList = response.body().get("questions");
-                                goToSuccessScreen(questionList); // -> 퀴즈 시작
+                                goToSuccessScreen(questionList);
                             } else {
-                                Log.d("QuizLoading", "문제 생성에 실패했습니다 (오류코드:" + response.code() + ")");
+                                Log.d(TAG, "문제 생성에 실패했습니다 (오류코드:" + response.code() + ")");
                                 Toast.makeText(getContext(), "문제 생성 실패 (오류: " + response.code() + ")", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -224,20 +196,15 @@ public class QuizLoadingFragment extends Fragment {
         }).start();
     }
 
-    // --- (이하 헬퍼 메소드들은 기존과 동일) ---
-
-    private String readTextFromFile(String filePath) {
-        File file = new File(filePath);
-        StringBuilder text = new StringBuilder();
-
-    /** [수정됨] 퀴즈 시작 화면으로 이동할 때, "filePath"도 함께 전달 */
     private void goToSuccessScreen(List<Question> questionList) {
-        if (questionList == null || questionList.isEmpty()) { /* (오류 처리) */ return; }
+        if (questionList == null || questionList.isEmpty()) {
+            Toast.makeText(getContext(), "AI가 문제를 생성하지 못했습니다.", Toast.LENGTH_SHORT).show();
+            if (getActivity() != null) getActivity().finish();
+            return;
+        }
 
         Bundle bundle = new Bundle();
         bundle.putSerializable("questionList", (Serializable) questionList);
-
-        // ▼▼▼ (1. "다시 만들기"를 위해 .txt 파일 경로를 넘겨줍니다) ▼▼▼
         bundle.putString("filePath", txtFilePath);
 
         QuizSuccessFragment successFragment = new QuizSuccessFragment();
@@ -276,7 +243,8 @@ public class QuizLoadingFragment extends Fragment {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                text.append(line).append('\n');
+                text.append(line);
+                text.append('\n');
             }
         } catch (IOException e) {
             Log.e(TAG, "파일을 읽을 수 없습니다: " + path, e);
@@ -284,5 +252,4 @@ public class QuizLoadingFragment extends Fragment {
         }
         return text.toString();
     }
-
 }
