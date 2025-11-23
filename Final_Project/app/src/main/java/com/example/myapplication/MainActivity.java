@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             if (currentFragment instanceof HomeFragment) {
                 ((HomeFragment) currentFragment).filterRecordingsByContent(null);
             } else if (currentFragment instanceof GenerateFragment) {
-                ((GenerateFragment) currentFragment).loadRecordingsFromStorage();
+                ((GenerateFragment) currentFragment).filterAndLoadMyQuizzes();
             }
 
         } catch (IOException e) {

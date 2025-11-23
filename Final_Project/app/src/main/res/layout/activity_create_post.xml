@@ -11,6 +11,15 @@
         android:layout_height="wrap_content"
         android:hint="제목" />
 
+    <Spinner
+        android:id="@+id/spinner_category"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:entries="@array/board_categories"
+        android:background="@android:drawable/btn_dropdown"
+        android:spinnerMode="dropdown"
+        android:layout_marginBottom="12dp"/>
+
     <EditText
         android:id="@+id/et_post_content"
         android:layout_width="match_parent"

@@ -8,4 +8,10 @@
         <item>음성/문제 공유</item>
         <item>자유게시판</item>
     </string-array>
+
+    <string-array name="board_categories">
+        <item>자유게시판</item>
+        <item>질문게시판</item>
+        <item>정보공유</item>
+    </string-array>
 </resources>

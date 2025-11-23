@@ -47,5 +47,9 @@
 
         <activity android:name=".User.RegisterActivity" />
 
+        <activity android:name=".community.PostDetailActivity" />
+
+        <activity android:name=".User.EditProfileActivity" />
+
     </application>
 </manifest>

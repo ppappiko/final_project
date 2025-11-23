@@ -7,6 +7,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 import java.util.List;
@@ -15,11 +16,11 @@ import java.util.Map;
 public interface UserService {
 
     // 회원가입 요청
-    @POST("/register")
+    @POST("/api/users/register")
     Call<Map<String, String>> registerUser(@Body User user);
 
     // 로그인 요청
-    @POST("/login")
+    @POST("/api/users/login")
     Call<Map<String, String>> loginUser(@Body Map<String, String> credentials);
 
     @GET("/test")
@@ -31,7 +32,7 @@ public interface UserService {
     @POST("/verify/email-confirm")
     Call<Map<String, String>> confirmEmailVerification(@Body Map<String, String> verificationData);
 
-    @POST("/check-nickname")
+    @POST("/api/users/check-nickname")
     Call<Map<String, String>> checkNickname(@Body Map<String, String> nickname);
 
     /**
@@ -66,4 +67,18 @@ public interface UserService {
             @Header("Authorization") String authToken, // ⬅️ 3. 인증 토큰 파라미터 추가
             @Body Map<String, String> requestData
     );
+
+    /**
+     * GET: 내가 문제를 생성한 파일 목록 조회
+     */
+    @GET("/ai/questions/list")
+    Call<Map<String, List<String>>> getMyQuizList(@Header("Authorization") String token);
+
+    // 내 정보 가져오기
+    @GET("/api/users/me")
+    Call<UserDto> getMyInfo(@Header("Authorization") String token);
+
+    // 내 정보 수정하기
+    @PUT("/api/users/me")
+    Call<Void> updateMyInfo(@Header("Authorization") String token, @Body UserDto userDto);
 }
