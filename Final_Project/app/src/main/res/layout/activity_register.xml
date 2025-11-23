@@ -60,10 +60,9 @@
         <EditText
             android:id="@+id/et_phone"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/edittext_background"
-            android:paddingStart="16dp" android:paddingEnd="16dp"
-            android:inputType="phone"/>
+            android:layout_height="wrap_content"
+            android:hint="전화번호 (- 없이 숫자만 입력)"
+            android:inputType="phone" />
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="이메일" android:layout_marginTop="16dp"/>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
