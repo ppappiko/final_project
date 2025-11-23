@@ -15,6 +15,7 @@ import com.example.myapplication.R;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -84,7 +85,9 @@ public class RegisterActivity extends AppCompatActivity {
                     "이메일 발송에 실패했습니다.",
                     () -> layoutEmailVerify.setVisibility(View.VISIBLE),
                     null
+
             ));
+            Toast.makeText(this, "인증 이메일이 10초이내에 발송됩니다.", Toast.LENGTH_SHORT).show();
         });
 
         // 3. 이메일 인증 확인 버튼
@@ -105,6 +108,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // 4. 최종 회원가입 버튼
         btnRegister.setOnClickListener(v -> {
+
             if (!isNicknameChecked) {
                 Toast.makeText(this, "닉네임 중복 확인을 해주세요.", Toast.LENGTH_SHORT).show();
                 return;
@@ -121,6 +125,17 @@ public class RegisterActivity extends AppCompatActivity {
             String email = etEmail.getText().toString();
             User user = new User(username, password, name, phone, email);
 
+            // ▼▼▼ [추가] 비밀번호 유효성 검사 ▼▼▼
+            // 규칙: 영문자 포함 + 숫자 포함 + 9자 이상
+            if (!isValidPassword(password)) {
+                Toast.makeText(this, "비밀번호는 영문과 숫자를 포함하여 9자 이상이어야 합니다.", Toast.LENGTH_LONG).show();
+                return; // 서버로 요청 보내지 않고 종료
+            }
+            if (!isValidPhoneNumber(phone)) {
+                Toast.makeText(this, "올바른 휴대전화 번호를 입력해주세요. (010으로 시작, 11자리)", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             userService.registerUser(user).enqueue(createCallback(
                     "회원가입 성공!",
                     "회원가입 실패",
@@ -128,6 +143,31 @@ public class RegisterActivity extends AppCompatActivity {
                     null
             ));
         });
+    }
+
+    private boolean isValidPassword(String password) {
+        // 정규식 설명:
+        // ^                 : 문자열 시작
+        // (?=.*[A-Za-z])    : 최소 하나의 영문자가 포함되어야 함
+        // (?=.*[0-9])       : 최소 하나의 숫자가 포함되어야 함
+        // .{9,}             : 길이가 최소 9자 이상이어야 함
+        // $                 : 문자열 끝
+        String passwordPattern = "^(?=.*[A-Za-z])(?=.*[0-9]).{9,}$";
+
+        return Pattern.matches(passwordPattern, password);
+    }
+    /**
+     * [신규] 전화번호 정규식 검사
+     * 규칙: 010으로 시작 + 숫자 8자리 (총 11자리, 하이픈 없음)
+     */
+    private boolean isValidPhoneNumber(String phone) {
+        // 1. 하이픈(-)이 있다면 제거해주는 센스 (선택 사항)
+        // phone = phone.replace("-", "");
+
+        // 정규식: ^010 (010으로 시작) + [0-9]{8} (숫자 8개) + $ (끝)
+        String phonePattern = "^010[0-9]{8}$";
+
+        return Pattern.matches(phonePattern, phone);
     }
 
     private Callback<Map<String, String>> createCallback(String successMsg, String errorMsg, Runnable onSuccess, Runnable onFailure) {
