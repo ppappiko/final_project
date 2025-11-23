@@ -201,10 +201,12 @@ public class MainActivity extends AppCompatActivity {
         if (fragment instanceof HomeFragment) {
             btnNewRecord.setVisibility(View.VISIBLE);
             showActionButtons(false, false, false);
-        } else if (!(fragment instanceof DetailsFragment)) {
-            btnNewRecord.setVisibility(View.GONE);
+        }else {
+        btnNewRecord.setVisibility(View.GONE);
+        if (!(fragment instanceof DetailsFragment)) {
             showActionButtons(false, false, false);
         }
+    }
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.main_frame, fragment)

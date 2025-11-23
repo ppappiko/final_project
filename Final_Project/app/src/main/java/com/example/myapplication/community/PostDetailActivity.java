@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +37,8 @@ public class PostDetailActivity extends AppCompatActivity {
     // 3. 데이터
     private Post currentPost;
     private CommentAdapter commentAdapter;
+    private LinearLayout layoutAttachment; // 추가
+    private TextView tvAttachmentName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,9 @@ public class PostDetailActivity extends AppCompatActivity {
         etComment = findViewById(R.id.et_comment);
         btnSend = findViewById(R.id.btn_send_comment);
 
+        layoutAttachment = findViewById(R.id.layout_attachment);
+        tvAttachmentName = findViewById(R.id.tv_attachment_name);
+
 
         // --- [2] 데이터 받아오기 & 화면 표시 ---
 
@@ -63,6 +69,7 @@ public class PostDetailActivity extends AppCompatActivity {
         currentPost = (Post) getIntent().getSerializableExtra("post_data");
 
         if (currentPost != null) {
+
             tvTitle.setText(currentPost.getTitle());
             tvAuthor.setText(currentPost.getAuthor()); // (Post.java의 변수명에 따라 getAuthorName()일 수 있음)
             tvContent.setText(currentPost.getContentPreview()); // (전체 내용을 가져오는 Getter 사용 권장)
@@ -71,11 +78,36 @@ public class PostDetailActivity extends AppCompatActivity {
             if (currentPost.getTimestamp() != null) {
                 tvDate.setText(currentPost.getTimestamp().replace("T", " ").substring(0, 16));
             }
+
+            String fileName = currentPost.getAttachmentFileName();
+
+            if (fileName != null && !fileName.isEmpty()) {
+                // 파일이 있으면 보이게 설정
+                layoutAttachment.setVisibility(View.VISIBLE);
+
+                // "uuid_진짜이름.pdf" 형식일 수 있으므로 앞의 uuid 제거하고 보여주기 (선택사항)
+                // (서버가 그냥 보냈다면 그대로 표시)
+                String displayName = fileName;
+                if (fileName.contains("_")) {
+                    displayName = fileName.substring(fileName.indexOf("_") + 1);
+                }
+                tvAttachmentName.setText(displayName);
+
+                // (선택) 클릭 시 다운로드 기능 등을 연결할 수 있음
+                layoutAttachment.setOnClickListener(v -> {
+                    Toast.makeText(this, "파일 다운로드는 추후 구현 예정입니다.", Toast.LENGTH_SHORT).show();
+                });
+
+            } else {
+                // 파일 없으면 숨김
+                layoutAttachment.setVisibility(View.GONE);
+            }
         } else {
             Toast.makeText(this, "게시글 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
             finish(); // 정보가 없으면 화면 종료
             return;
         }
+
 
 
         // --- [3] 기능 설정 ---

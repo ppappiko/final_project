@@ -5,9 +5,12 @@ public class PostRequest {
     private String content;
     private String category; // "FREE", "QNA", "INFO"
 
-    public PostRequest(String title, String content, String category) {
+    private String attachedQuizKey;
+
+    public PostRequest(String title, String content, String category, String attachedQuizKey) {
         this.title = title;
         this.content = content;
         this.category = category;
+        this.attachedQuizKey = attachedQuizKey;
     }
 }

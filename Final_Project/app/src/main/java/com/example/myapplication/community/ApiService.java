@@ -1,11 +1,16 @@
 package com.example.myapplication.community;
 
 import java.util.List;
+
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 
 public interface ApiService {
@@ -17,12 +22,13 @@ public interface ApiService {
             @Path("category") String category
     );
 
-    // 게시글 작성
-    // 예: POST /api/posts
+    // [수정] 게시글 작성 (Multipart)
+    @Multipart
     @POST("/api/posts")
     Call<Void> createPost(
             @Header("Authorization") String token,
-            @Body PostRequest postRequest
+            @Part("data") RequestBody postData,   // JSON 데이터
+            @Part MultipartBody.Part file         // 파일 데이터
     );
 
     // 댓글 목록 조회
@@ -39,4 +45,5 @@ public interface ApiService {
             @Path("postId") Long postId,
             @Body java.util.Map<String, String> content
     );
+
 }

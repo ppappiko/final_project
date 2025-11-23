@@ -54,6 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="로그인"
+        android:textColor="@color/white"
         android:textSize="18sp"
         android:layout_marginTop="24dp"
         android:background="#20C997"/>
@@ -84,7 +85,7 @@
             android:layout_height="wrap_content"
             android:text="회원가입"
             android:textStyle="bold"
-            android:textColor="@color/design_default_color_primary"/>
+            android:textColor="@color/black"/>
 
 
     </LinearLayout>

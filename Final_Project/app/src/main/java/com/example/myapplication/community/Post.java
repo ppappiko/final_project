@@ -26,6 +26,9 @@ public class Post implements Serializable{
     @SerializedName("createdAt")
     private String timestamp;
 
+    @SerializedName("attachmentFileName")
+    private String attachmentFileName;
+
     // 기본 생성자 (Retrofit용)
     public Post() {}
 
@@ -38,6 +41,8 @@ public class Post implements Serializable{
     public String getContentPreview() { return contentPreview; }
     public String getAuthor() { return author; }
     public String getTimestamp() { return timestamp; }
+
+    public String getAttachmentFileName() { return attachmentFileName; }
     public String getFormattedTime() {
         if (timestamp == null || timestamp.isEmpty()) return "";
 
