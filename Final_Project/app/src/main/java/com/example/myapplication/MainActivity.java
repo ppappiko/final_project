@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
     private Button btnNewRecord;
-    private ImageView btnSearch, btnBell, btnRefresh;
+    private ImageView btnSearch, btnRefresh, btnGenerateProblem; // 문제 생성 버튼 변수 추가
 
     private ActivityResultLauncher<String> filePickerLauncher;
 
@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
         bottomNav    = findViewById(R.id.bottomNav);
         btnNewRecord = findViewById(R.id.btnNewRecord);
         btnSearch    = findViewById(R.id.btnSearch);
-        btnBell      = findViewById(R.id.btnBell);
         btnRefresh   = findViewById(R.id.btnRefresh);
+        btnGenerateProblem = findViewById(R.id.btnGenerateProblem); // 뷰 초기화
 
         filePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         btnSearch.setOnClickListener(v -> showSearchDialog());
-        btnBell.setOnClickListener(v -> Toast.makeText(this, "알림 클릭", Toast.LENGTH_SHORT).show());
 
         btnRefresh.setOnClickListener(v -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
@@ -63,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
                 ((DetailsFragment) currentFragment).requestRefreshToChild();
             }
         });
+
+        // TODO: 문제 생성 버튼 클릭 리스너 구현 (추후 기능 구현)
+        btnGenerateProblem.setOnClickListener(v -> Toast.makeText(this, "문제 생성 클릭", Toast.LENGTH_SHORT).show());
 
         btnNewRecord.setOnClickListener(v -> showUploadOrRecordDialog());
 
@@ -188,8 +190,10 @@ public class MainActivity extends AppCompatActivity {
             btnNewRecord.setVisibility(View.GONE);
         }
         
+        // DetailsFragment가 아니면 두 버튼 모두 숨김
         if (!(fragment instanceof DetailsFragment)) {
             btnRefresh.setVisibility(View.GONE);
+            btnGenerateProblem.setVisibility(View.GONE);
         }
 
         getSupportFragmentManager().beginTransaction()
@@ -198,7 +202,9 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    public void showRefreshButton(boolean show) {
+    // 두 버튼의 표시 여부를 한 번에 제어하는 메소드
+    public void showActionButtons(boolean show) {
         btnRefresh.setVisibility(show ? View.VISIBLE : View.GONE);
+        btnGenerateProblem.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }
