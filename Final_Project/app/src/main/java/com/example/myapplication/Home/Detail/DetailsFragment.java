@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.Home.Detail.Summary.SummaryFragment;
 import com.example.myapplication.Home.Detail.Transcript.TranscriptFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -21,6 +23,7 @@ public class DetailsFragment extends Fragment {
 
     private ViewPager2 viewPager;
     private String recordingFilePath;
+    private TabLayout tabLayout;
 
     @Nullable
     @Override
@@ -32,7 +35,7 @@ public class DetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+        tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
         TextView tvTitle = view.findViewById(R.id.tv_detail_title);
         TextView tvDate = view.findViewById(R.id.tv_detail_date);
@@ -59,7 +62,7 @@ public class DetailsFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                updateActionButtonsVisibility(); // 탭 선택 시 버튼 상태 업데이트
+                updateActionButtonsVisibility();
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) { }
@@ -71,34 +74,52 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateActionButtonsVisibility(); // 화면에 다시 나타날 때 버튼 상태 업데이트
+        updateActionButtonsVisibility();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).showActionButtons(false); // 화면을 벗어나면 버튼 숨김
+            ((MainActivity) getActivity()).showActionButtons(false, false, false);
         }
     }
 
-    // 상단 액션 버튼들의 노출 여부를 결정하는 메소드
     public void updateActionButtonsVisibility() {
-        if (getActivity() instanceof MainActivity) {
+        if (getActivity() instanceof MainActivity && isAdded()) {
             viewPager.post(() -> {
                 Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
-                // 현재 탭이 0번째(대화 내용)이고, 받아쓰기 결과가 화면에 표시되고 있을 때만 버튼들을 보여줌
-                boolean shouldShow = viewPager.getCurrentItem() == 0 && currentItem instanceof TranscriptFragment && ((TranscriptFragment) currentItem).isShowingResult();
-                ((MainActivity) getActivity()).showActionButtons(shouldShow);
+                boolean showRefresh = false;
+                boolean showRegenerate = false;
+                boolean showGenerateQuiz = false;
+
+                if (currentItem instanceof TranscriptFragment) {
+                    showRefresh = ((TranscriptFragment) currentItem).isShowingResult();
+                    showGenerateQuiz = ((TranscriptFragment) currentItem).isShowingResult();
+                } else if (currentItem instanceof SummaryFragment) {
+                    showRegenerate = ((SummaryFragment) currentItem).isShowingResult();
+                }
+
+                ((MainActivity) getActivity()).showActionButtons(showRefresh, showRegenerate, showGenerateQuiz);
             });
         }
     }
 
-    // MainActivity로부터 새로고침 요청을 받았을 때 자식 Fragment로 전달
     public void requestRefreshToChild() {
         Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
         if (currentItem instanceof TranscriptFragment) {
             ((TranscriptFragment) currentItem).handleRefreshRequest();
         }
+    }
+
+    public void requestRegenerateSummaryToChild() {
+        Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
+        if (currentItem instanceof SummaryFragment) {
+            ((SummaryFragment) currentItem).handleRegenerateRequest();
+        }
+    }
+
+    public void requestGenerateQuizToChild() {
+        Toast.makeText(getContext(), "문제 생성 버튼이 눌렸습니다.", Toast.LENGTH_SHORT).show();
     }
 }

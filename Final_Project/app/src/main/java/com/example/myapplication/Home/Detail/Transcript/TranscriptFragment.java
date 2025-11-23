@@ -70,23 +70,20 @@ public class TranscriptFragment extends Fragment {
         observeViewModel();
 
         if (!loadExistingTranscript()) {
-            btnDictation.setVisibility(View.VISIBLE);
-            scrollView.setVisibility(View.GONE);
+            setInitialState();
         }
     }
 
     private void observeViewModel() {
         viewModel.getUiState().observe(getViewLifecycleOwner(), uiState -> {
             if (uiState instanceof TranscriptViewModel.Loading) {
-                setLoadingState(true);
+                setLoadingState();
             } else if (uiState instanceof TranscriptViewModel.Success) {
                 String transcript = ((TranscriptViewModel.Success) uiState).transcript;
-                setLoadingState(false);
                 displayTranscript(transcript);
                 saveTranscriptToFile(transcript);
             } else if (uiState instanceof TranscriptViewModel.Error) {
                 String errorMessage = ((TranscriptViewModel.Error) uiState).message;
-                setLoadingState(false);
                 displayTranscript("변환 실패: " + errorMessage);
             }
         });
@@ -127,12 +124,21 @@ public class TranscriptFragment extends Fragment {
         return false;
     }
 
+    private void setInitialState() {
+        isShowingResult = false;
+        btnDictation.setVisibility(View.VISIBLE);
+        scrollView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+        updateParentActionButtons();
+    }
+
     private void displayTranscript(String text) {
         isShowingResult = true;
         tvTranscript.setText(text != null && !text.isEmpty() ? text : "변환된 텍스트가 없습니다.");
         scrollView.setVisibility(View.VISIBLE);
         btnDictation.setVisibility(View.GONE);
-        updateActionButtonsVisibilityInParent(); // 부모에게 버튼 상태 업데이트 요청
+        progressBar.setVisibility(View.GONE);
+        updateParentActionButtons();
     }
 
     private void saveTranscriptToFile(String text) {
@@ -145,17 +151,16 @@ public class TranscriptFragment extends Fragment {
         }
     }
 
-    private void setLoadingState(boolean isLoading) {
-        isShowingResult = !isLoading;
-        progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        btnDictation.setVisibility(isLoading ? View.GONE : btnDictation.getVisibility());
-        scrollView.setVisibility(isLoading ? View.GONE : scrollView.getVisibility());
-        updateActionButtonsVisibilityInParent(); // 부모에게 버튼 상태 업데이트 요청
+    private void setLoadingState() {
+        isShowingResult = false;
+        progressBar.setVisibility(View.VISIBLE);
+        scrollView.setVisibility(View.GONE);
+        btnDictation.setVisibility(View.GONE);
+        updateParentActionButtons();
     }
 
-    // 부모 프래그먼트(DetailsFragment)에 버튼 상태 업데이트를 요청하는 메소드
-    private void updateActionButtonsVisibilityInParent(){
-        if(getParentFragment() instanceof DetailsFragment){
+    private void updateParentActionButtons() {
+        if (getParentFragment() instanceof DetailsFragment) {
             ((DetailsFragment) getParentFragment()).updateActionButtonsVisibility();
         }
     }

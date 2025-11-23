@@ -32,7 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
     private Button btnNewRecord;
-    private ImageView btnSearch, btnRefresh, btnGenerateProblem; // 문제 생성 버튼 변수 추가
+    private ImageView btnSearch;
+    private ImageView btnRefresh;
+    private ImageView btnRegenerateSummary;
+    private ImageView btnGenerateQuiz;
 
     private ActivityResultLauncher<String> filePickerLauncher;
 
@@ -41,11 +44,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bottomNav    = findViewById(R.id.bottomNav);
+        bottomNav = findViewById(R.id.bottomNav);
         btnNewRecord = findViewById(R.id.btnNewRecord);
-        btnSearch    = findViewById(R.id.btnSearch);
-        btnRefresh   = findViewById(R.id.btnRefresh);
-        btnGenerateProblem = findViewById(R.id.btnGenerateProblem); // 뷰 초기화
+        btnSearch = findViewById(R.id.btnSearch);
+        btnRefresh = findViewById(R.id.btnRefresh);
+        btnRegenerateSummary = findViewById(R.id.btnRegenerateSummary);
+        btnGenerateQuiz = findViewById(R.id.btnGenerateQuiz);
 
         filePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         btnSearch.setOnClickListener(v -> showSearchDialog());
+        btnNewRecord.setOnClickListener(v -> showUploadOrRecordDialog());
 
         btnRefresh.setOnClickListener(v -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
@@ -63,10 +68,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // TODO: 문제 생성 버튼 클릭 리스너 구현 (추후 기능 구현)
-        btnGenerateProblem.setOnClickListener(v -> Toast.makeText(this, "문제 생성 클릭", Toast.LENGTH_SHORT).show());
+        btnRegenerateSummary.setOnClickListener(v -> {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
+            if (currentFragment instanceof DetailsFragment) {
+                ((DetailsFragment) currentFragment).requestRegenerateSummaryToChild();
+            }
+        });
 
-        btnNewRecord.setOnClickListener(v -> showUploadOrRecordDialog());
+        btnGenerateQuiz.setOnClickListener(v -> {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.main_frame);
+            if (currentFragment instanceof DetailsFragment) {
+                ((DetailsFragment) currentFragment).requestGenerateQuizToChild();
+            }
+        });
 
         replaceFragment(new HomeFragment());
 
@@ -111,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "파일 이름을 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         if (!sourceFileName.toLowerCase().endsWith(".m4a")) {
             Toast.makeText(this, "m4a 형식의 오디오 파일만 가져올 수 있습니다.", Toast.LENGTH_LONG).show();
             return;
@@ -186,14 +200,10 @@ public class MainActivity extends AppCompatActivity {
     public void replaceFragment(Fragment fragment) {
         if (fragment instanceof HomeFragment) {
             btnNewRecord.setVisibility(View.VISIBLE);
-        } else {
+            showActionButtons(false, false, false);
+        } else if (!(fragment instanceof DetailsFragment)) {
             btnNewRecord.setVisibility(View.GONE);
-        }
-        
-        // DetailsFragment가 아니면 두 버튼 모두 숨김
-        if (!(fragment instanceof DetailsFragment)) {
-            btnRefresh.setVisibility(View.GONE);
-            btnGenerateProblem.setVisibility(View.GONE);
+            showActionButtons(false, false, false);
         }
 
         getSupportFragmentManager().beginTransaction()
@@ -202,9 +212,9 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    // 두 버튼의 표시 여부를 한 번에 제어하는 메소드
-    public void showActionButtons(boolean show) {
-        btnRefresh.setVisibility(show ? View.VISIBLE : View.GONE);
-        btnGenerateProblem.setVisibility(show ? View.VISIBLE : View.GONE);
+    public void showActionButtons(boolean showRefresh, boolean showRegenerate, boolean showGenerateQuiz) {
+        btnRefresh.setVisibility(showRefresh ? View.VISIBLE : View.GONE);
+        btnRegenerateSummary.setVisibility(showRegenerate ? View.VISIBLE : View.GONE);
+        btnGenerateQuiz.setVisibility(showGenerateQuiz ? View.VISIBLE : View.GONE);
     }
 }
