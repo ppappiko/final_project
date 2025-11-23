@@ -1,7 +1,11 @@
 package com.example.myapplication.community;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,12 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.ApiClient;
 import com.example.myapplication.R;
+import com.example.myapplication.User.UserDto;
+import com.example.myapplication.User.UserService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +34,7 @@ import retrofit2.Response;
 public class PostDetailActivity extends AppCompatActivity {
 
     // 1. 게시글 정보 보여줄 뷰들
-    private TextView tvBack, tvTitle, tvAuthor, tvDate, tvContent;
+    private TextView tvTitle, tvAuthor, tvDate, tvContent;
 
     // 2. 댓글 관련 뷰들
     private RecyclerView rvComments;
@@ -39,16 +46,17 @@ public class PostDetailActivity extends AppCompatActivity {
     private CommentAdapter commentAdapter;
     private LinearLayout layoutAttachment; // 추가
     private TextView tvAttachmentName;
+    private String myNickname = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_detail);
+        fetchMyInfoAndCheckPermission();
 
         // --- [1] 뷰 초기화 (findViewById) ---
 
         // 게시글 영역
-        tvBack = findViewById(R.id.btn_back);
         tvTitle = findViewById(R.id.detail_title);
         tvAuthor = findViewById(R.id.detail_author);
         tvDate = findViewById(R.id.detail_date);
@@ -63,6 +71,20 @@ public class PostDetailActivity extends AppCompatActivity {
         tvAttachmentName = findViewById(R.id.tv_attachment_name);
 
 
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+
+        if (toolbar != null) {
+            // 2. 이 코드가 있어야 onCreateOptionsMenu가 호출됩니다.
+            setSupportActionBar(toolbar);
+
+            // 3. 뒤로가기 버튼 및 제목 설정
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
+            }
+        } else {
+            android.util.Log.e("MenuCheck", "툴바를 찾을 수 없습니다! XML ID를 확인하세요.");
+        }
         // --- [2] 데이터 받아오기 & 화면 표시 ---
 
         // 목록 화면에서 넘겨준 Post 객체 받기
@@ -113,7 +135,6 @@ public class PostDetailActivity extends AppCompatActivity {
         // --- [3] 기능 설정 ---
 
         // 뒤로가기 버튼 클릭 시
-        tvBack.setOnClickListener(v -> finish());
 
         // 댓글 리스트 설정
         rvComments.setLayoutManager(new LinearLayoutManager(this));
@@ -227,5 +248,101 @@ public class PostDetailActivity extends AppCompatActivity {
             android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    // [서버에서 내 정보 가져오기]
+    private void fetchMyInfoAndCheckPermission() {
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String token = prefs.getString("jwt_token", "");
+
+        ApiClient.getClient().create(UserService.class).getMyInfo("Bearer " + token).enqueue(new Callback<UserDto>() {
+            @Override
+            public void onResponse(Call<UserDto> call, Response<UserDto> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    myNickname = response.body().getUsername();
+                    invalidateOptionsMenu(); // 메뉴 다시 그리기 (onPrepareOptionsMenu 호출)
+                }
+            }
+            @Override
+            public void onFailure(Call<UserDto> call, Throwable t) {}
+        });
+    }
+
+    // [메뉴 생성]
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        android.util.Log.d("MenuCheck", "메뉴 생성 메서드(onCreateOptionsMenu) 호출됨!");
+        getMenuInflater().inflate(R.menu.menu_post_options, menu);
+        return true;
+    }
+
+    // [메뉴 보이기/숨기기] - 내 글일 때만 보임
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // 1. 내 닉네임과 작성자 닉네임 확인 (로그캣에서 "NickCheck" 검색)
+        String author = (currentPost != null) ? currentPost.getAuthor() : "null";
+
+        android.util.Log.d("NickCheck", "내 닉네임: " + myNickname);
+        android.util.Log.d("NickCheck", "글 작성자: " + author);
+
+        // 2. 비교 로직 (null 체크 포함)
+        boolean isMyPost = (myNickname != null) && myNickname.equals(author);
+
+        // ▼▼▼ [테스트용] 무조건 true로 설정해서 메뉴가 나오는지 확인하세요! ▼▼▼
+        isMyPost = true;
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+        menu.findItem(R.id.action_edit).setVisible(isMyPost);
+        menu.findItem(R.id.action_delete).setVisible(isMyPost);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    // [메뉴 클릭 이벤트]
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_delete) {
+            // 삭제 확인 다이얼로그
+            new AlertDialog.Builder(this)
+                    .setTitle("게시글 삭제")
+                    .setMessage("정말 삭제하시겠습니까?")
+                    .setPositiveButton("삭제", (dialog, which) -> deletePost())
+                    .setNegativeButton("취소", null)
+                    .show();
+            return true;
+        } else if (id == R.id.action_edit) {
+            // 수정 화면으로 이동
+            Intent intent = new Intent(this, CreatePostActivity.class);
+            intent.putExtra("is_edit_mode", true); // 수정 모드 플래그
+            intent.putExtra("post_data", currentPost); // 기존 데이터 전달
+            startActivity(intent);
+            finish(); // 상세화면 종료 (수정 후 돌아오면 갱신되게 하려면 안 닫아도 됨)
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    // [삭제 API 호출]
+    private void deletePost() {
+        String token = "Bearer " + getSharedPreferences("app_prefs", MODE_PRIVATE).getString("jwt_token", "");
+
+        ApiClient.getClient().create(ApiService.class).deletePost(token, currentPost.getId()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(PostDetailActivity.this, "삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    finish(); // 목록으로 돌아가기
+                } else {
+                    Toast.makeText(PostDetailActivity.this, "삭제 실패", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(PostDetailActivity.this, "오류 발생", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
