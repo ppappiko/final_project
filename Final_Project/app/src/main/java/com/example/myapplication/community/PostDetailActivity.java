@@ -110,6 +110,14 @@ public class PostDetailActivity extends AppCompatActivity {
         Map<String, String> body = new HashMap<>();
         body.put("content", content);
 
+        // ▼▼▼ [로그 확인] 로그캣에서 "CHECK_ID"로 검색해보세요 ▼▼▼
+        android.util.Log.d("CHECK_ID", "보내려는 게시글 ID: " + currentPost.getId());
+
+        if (currentPost.getId() == null) {
+            Toast.makeText(this, "게시글 오류: ID가 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // 2. 서버에 댓글 저장 요청
         ApiClient.getClient().create(ApiService.class)
                 .createComment(token, currentPost.getId(), body)
