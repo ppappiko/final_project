@@ -48,20 +48,17 @@ public class TranscriptFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 뷰 초기화
         scrollView = view.findViewById(R.id.scroll_view);
         tvTranscript = view.findViewById(R.id.tv_transcript);
         btnDictation = view.findViewById(R.id.btn_dictation);
         progressBar = view.findViewById(R.id.progress_bar);
 
-        // ViewModel 초기화
         viewModel = new ViewModelProvider(this).get(TranscriptViewModel.class);
 
         if (getArguments() != null) {
             filePath = getArguments().getString("filePath");
         }
 
-        // 받아쓰기 버튼 리스너
         btnDictation.setOnClickListener(v -> {
             if (filePath != null && !filePath.isEmpty()) {
                 viewModel.transcribeAudio(filePath);
@@ -70,10 +67,8 @@ public class TranscriptFragment extends Fragment {
             }
         });
 
-        // ViewModel의 LiveData 관찰하여 UI 업데이트
         observeViewModel();
 
-        // 기존 변환 결과 파일이 있으면 불러오기
         if (!loadExistingTranscript()) {
             btnDictation.setVisibility(View.VISIBLE);
             scrollView.setVisibility(View.GONE);
@@ -137,7 +132,7 @@ public class TranscriptFragment extends Fragment {
         tvTranscript.setText(text != null && !text.isEmpty() ? text : "변환된 텍스트가 없습니다.");
         scrollView.setVisibility(View.VISIBLE);
         btnDictation.setVisibility(View.GONE);
-        updateRefreshButtonVisibilityInParent();
+        updateActionButtonsVisibilityInParent(); // 부모에게 버튼 상태 업데이트 요청
     }
 
     private void saveTranscriptToFile(String text) {
@@ -155,12 +150,13 @@ public class TranscriptFragment extends Fragment {
         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         btnDictation.setVisibility(isLoading ? View.GONE : btnDictation.getVisibility());
         scrollView.setVisibility(isLoading ? View.GONE : scrollView.getVisibility());
-        updateRefreshButtonVisibilityInParent();
+        updateActionButtonsVisibilityInParent(); // 부모에게 버튼 상태 업데이트 요청
     }
 
-    private void updateRefreshButtonVisibilityInParent() {
-        if (getParentFragment() instanceof DetailsFragment) {
-            ((DetailsFragment) getParentFragment()).updateRefreshButtonVisibility();
+    // 부모 프래그먼트(DetailsFragment)에 버튼 상태 업데이트를 요청하는 메소드
+    private void updateActionButtonsVisibilityInParent(){
+        if(getParentFragment() instanceof DetailsFragment){
+            ((DetailsFragment) getParentFragment()).updateActionButtonsVisibility();
         }
     }
 }

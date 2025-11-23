@@ -41,11 +41,8 @@ public class DetailsFragment extends Fragment {
             String title = getArguments().getString("recordingTitle");
             String date = getArguments().getString("recordingDate");
             recordingFilePath = getArguments().getString("recordingFilePath");
-
-            // --- 누락되었던 코드 추가 ---
             tvTitle.setText(title);
             tvDate.setText(date);
-            // --------------------------
         }
 
         DetailsViewPagerAdapter adapter = new DetailsViewPagerAdapter(this, recordingFilePath);
@@ -62,7 +59,7 @@ public class DetailsFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                updateRefreshButtonVisibility();
+                updateActionButtonsVisibility(); // 탭 선택 시 버튼 상태 업데이트
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) { }
@@ -74,27 +71,30 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateRefreshButtonVisibility();
+        updateActionButtonsVisibility(); // 화면에 다시 나타날 때 버튼 상태 업데이트
     }
 
     @Override
     public void onPause() {
         super.onPause();
         if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).showRefreshButton(false);
+            ((MainActivity) getActivity()).showActionButtons(false); // 화면을 벗어나면 버튼 숨김
         }
     }
 
-    public void updateRefreshButtonVisibility() {
+    // 상단 액션 버튼들의 노출 여부를 결정하는 메소드
+    public void updateActionButtonsVisibility() {
         if (getActivity() instanceof MainActivity) {
             viewPager.post(() -> {
                 Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
+                // 현재 탭이 0번째(대화 내용)이고, 받아쓰기 결과가 화면에 표시되고 있을 때만 버튼들을 보여줌
                 boolean shouldShow = viewPager.getCurrentItem() == 0 && currentItem instanceof TranscriptFragment && ((TranscriptFragment) currentItem).isShowingResult();
-                ((MainActivity) getActivity()).showRefreshButton(shouldShow);
+                ((MainActivity) getActivity()).showActionButtons(shouldShow);
             });
         }
     }
 
+    // MainActivity로부터 새로고침 요청을 받았을 때 자식 Fragment로 전달
     public void requestRefreshToChild() {
         Fragment currentItem = getChildFragmentManager().findFragmentByTag("f" + viewPager.getCurrentItem());
         if (currentItem instanceof TranscriptFragment) {
