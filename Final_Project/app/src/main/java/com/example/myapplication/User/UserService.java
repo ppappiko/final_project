@@ -80,5 +80,8 @@ public interface UserService {
 
     // 내 정보 수정하기
     @PUT("/api/users/me")
-    Call<Void> updateMyInfo(@Header("Authorization") String token, @Body UserDto userDto);
+    Call<Map<String, String>> updateMyInfo(
+            @Header("Authorization") String token,
+            @Body UserDto userDto
+    );
 }
