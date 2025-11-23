@@ -1,5 +1,6 @@
 package com.example.myapplication.Home.Detail;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.Home.Detail.Summary.SummaryFragment;
 import com.example.myapplication.Home.Detail.Transcript.TranscriptFragment;
+import com.example.myapplication.question.QuizActivity;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -119,7 +121,34 @@ public class DetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * MainActivity의 '문제 생성' 버튼 클릭 시 호출되는 메서드
+     */
     public void requestGenerateQuizToChild() {
-        Toast.makeText(getContext(), "문제 생성 버튼이 눌렸습니다.", Toast.LENGTH_SHORT).show();
+        // 1. 파일 경로 확인
+        if (recordingFilePath == null || recordingFilePath.isEmpty()) {
+            Toast.makeText(getContext(), "파일 경로를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 2. .m4a (오디오) 경로를 .txt (텍스트) 경로로 변환
+        // (AI는 텍스트 파일을 읽어서 문제를 생성하므로 변환이 필요합니다)
+        String textFilePath = recordingFilePath;
+        if (recordingFilePath.endsWith(".m4a")) {
+            textFilePath = recordingFilePath.replaceAll("\\.m4a$", ".txt");
+        }
+
+        // 3. 제목 가져오기 (Arguments에서 안전하게 가져옴)
+        String title = "제목 없음";
+        if (getArguments() != null) {
+            title = getArguments().getString("recordingTitle", "제목 없음");
+        }
+
+        // 4. QuizActivity 시작 (QuizLoadingFragment가 자동으로 실행됨)
+        Intent intent = new Intent(getActivity(), QuizActivity.class);
+        intent.putExtra("filePath", textFilePath); // 텍스트 파일 경로 전달
+        intent.putExtra("file_title", title);      // 제목 전달
+
+        startActivity(intent);
     }
 }

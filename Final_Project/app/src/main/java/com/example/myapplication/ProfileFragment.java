@@ -46,7 +46,6 @@ public class ProfileFragment extends Fragment {
         CardView cardMemberInfo = view.findViewById(R.id.card_member_info);
         CardView cardFaq = view.findViewById(R.id.card_faq);
         CardView cardTerms = view.findViewById(R.id.card_terms);
-        CardView cardReportError = view.findViewById(R.id.card_report_error);
         TextView btnLogout = view.findViewById(R.id.btn_logout);
         tvProfileName = view.findViewById(R.id.tv_user_name);
 
@@ -59,7 +58,6 @@ public class ProfileFragment extends Fragment {
         });
         cardFaq.setOnClickListener(v -> Toast.makeText(getContext(), "공지사항 및 FAQ 클릭됨", Toast.LENGTH_SHORT).show());
         cardTerms.setOnClickListener(v -> Toast.makeText(getContext(), "이용 약관 클릭됨", Toast.LENGTH_SHORT).show());
-        cardReportError.setOnClickListener(v -> Toast.makeText(getContext(), "오류 제보 클릭됨", Toast.LENGTH_SHORT).show());
         btnLogout.setOnClickListener(v -> {
             // Toast.makeText(getContext(), "로그아웃 클릭됨", Toast.LENGTH_SHORT).show(); // (기존 코드)
 

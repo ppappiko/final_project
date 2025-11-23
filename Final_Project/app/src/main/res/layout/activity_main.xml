@@ -93,7 +93,7 @@
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
         android:text="+ 새로운 녹음"
-        android.textColor="#FFFFFF"
+        android:textColor="@color/white"
         android:textStyle="bold"
         android:background="@drawable/new_record_button"
         app:layout_constraintBottom_toTopOf="@+id/bottomNav"
