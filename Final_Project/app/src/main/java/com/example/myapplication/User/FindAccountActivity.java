@@ -70,6 +70,7 @@ public class FindAccountActivity extends AppCompatActivity {
                     },
                     null // 실패 시 추가 동작 없음
             ));
+            Toast.makeText(this, "임시 비밀번호가 이메일로 전송되었습니다.\n메일함을 확인해주세요.", Toast.LENGTH_SHORT).show();
         });
     }
 

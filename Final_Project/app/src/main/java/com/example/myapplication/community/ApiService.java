@@ -4,6 +4,7 @@ import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -14,6 +15,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Streaming;
 
 public interface ApiService {
     // 게시글 목록 조회 (카테고리별)
@@ -68,5 +70,12 @@ public interface ApiService {
             @Header("Authorization") String token,
             @Path("postId") Long postId
     );
+
+    // [추가] 파일 다운로드
+    @Streaming // 대용량 파일 처리를 위해 필수
+    @GET("/api/posts/download/{fileName}")
+    Call<ResponseBody> downloadFile(
+            @Header("Authorization") String token,
+            @Path("fileName") String fileName);
 
 }

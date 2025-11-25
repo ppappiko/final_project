@@ -1,9 +1,13 @@
 package com.example.myapplication.community;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,10 +27,16 @@ import com.example.myapplication.R;
 import com.example.myapplication.User.UserDto;
 import com.example.myapplication.User.UserService;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -117,11 +127,13 @@ public class PostDetailActivity extends AppCompatActivity {
                 if (fileName.contains("_")) {
                     displayName = fileName.substring(fileName.indexOf("_") + 1);
                 }
+
+                final String finalDisplayName = displayName;
                 tvAttachmentName.setText(displayName);
 
                 // (선택) 클릭 시 다운로드 기능 등을 연결할 수 있음
                 layoutAttachment.setOnClickListener(v -> {
-                    Toast.makeText(this, "파일 다운로드는 추후 구현 예정입니다.", Toast.LENGTH_SHORT).show();
+                    downloadAttachment(fileName, finalDisplayName); // (서버파일명, 저장할파일명)
                 });
 
             } else {
@@ -143,7 +155,6 @@ public class PostDetailActivity extends AppCompatActivity {
             finish(); // 정보가 없으면 화면 종료
             return;
         }
-
 
 
         // --- [3] 기능 설정 ---
@@ -244,7 +255,6 @@ public class PostDetailActivity extends AppCompatActivity {
                             rvComments.setAdapter(commentAdapter);
 
 
-
                         }
                     }
 
@@ -277,8 +287,10 @@ public class PostDetailActivity extends AppCompatActivity {
                     invalidateOptionsMenu(); // 메뉴 다시 그리기 (onPrepareOptionsMenu 호출)
                 }
             }
+
             @Override
-            public void onFailure(Call<UserDto> call, Throwable t) {}
+            public void onFailure(Call<UserDto> call, Throwable t) {
+            }
         });
     }
 
@@ -365,6 +377,7 @@ public class PostDetailActivity extends AppCompatActivity {
                     Toast.makeText(PostDetailActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(PostDetailActivity.this, "오류 발생", Toast.LENGTH_SHORT).show();
@@ -399,5 +412,95 @@ public class PostDetailActivity extends AppCompatActivity {
                         Toast.makeText(PostDetailActivity.this, "오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    /**
+     * 파일 다운로드 요청 및 저장
+     */
+    private void downloadAttachment(String serverFileName, String saveFileName) {
+        Toast.makeText(this, "다운로드를 시작합니다...", Toast.LENGTH_SHORT).show();
+
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String token = "Bearer " + prefs.getString("jwt_token", "");
+
+        ApiClient.getClient().create(ApiService.class)
+                .downloadFile(token, serverFileName)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            // 성공하면 파일 쓰기 작업 시작 (백그라운드 스레드 권장)
+                            new Thread(() -> {
+                                boolean written = writeResponseBodyToDisk(response.body(), saveFileName);
+                                runOnUiThread(() -> {
+                                    if (written) {
+                                        Toast.makeText(PostDetailActivity.this, "다운로드 완료! (Download 폴더)", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(PostDetailActivity.this, "파일 저장 실패", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }).start();
+                        } else {
+                            Toast.makeText(PostDetailActivity.this, "다운로드 실패: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(PostDetailActivity.this, "통신 오류", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    /**
+     * [수정됨] MediaStore를 사용하여 Download 폴더에 파일 저장
+     */
+    private boolean writeResponseBodyToDisk(ResponseBody body, String fileName) {
+        try {
+            // 1. 저장할 파일 정보 설정
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName); // 파일명
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream"); // (또는 적절한 타입)
+            contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS); // 다운로드 폴더
+
+            // 2. MediaStore를 통해 Uri 생성 (이때 파일이 생성됨)
+            Uri fileUri = getContentResolver().insert(MediaStore.Files.getContentUri("external"), contentValues);
+
+            if (fileUri == null) {
+                return false; // 생성 실패
+            }
+
+            // 3. 스트림을 열어서 데이터 쓰기
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+
+            try {
+                byte[] fileReader = new byte[4096];
+                long fileSize = body.contentLength();
+                long fileSizeDownloaded = 0;
+
+                inputStream = body.byteStream();
+                outputStream = getContentResolver().openOutputStream(fileUri); // Uri로 스트림 열기
+
+                while (true) {
+                    int read = inputStream.read(fileReader);
+                    if (read == -1) break;
+                    outputStream.write(fileReader, 0, read);
+                    fileSizeDownloaded += read;
+                }
+                outputStream.flush();
+                return true;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            } finally {
+                if (inputStream != null) inputStream.close();
+                if (outputStream != null) outputStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
