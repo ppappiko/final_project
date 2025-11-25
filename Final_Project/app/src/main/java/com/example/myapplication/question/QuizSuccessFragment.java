@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.example.myapplication.Home.Detail.Question.Question; // Question 모델
 import com.example.myapplication.R;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList; // ⬅️ 1. (추가) ArrayList 임포트
 import java.util.List;
@@ -72,6 +73,19 @@ public class QuizSuccessFragment extends Fragment {
             tvQuestionCount.setText("AI가 문제를 반환하지 않았습니다.");
         }
 
+        File file = null;
+        if (filePath != null) {
+            file = new File(filePath);
+        }
+
+        // 내 폰에 원본 파일(.txt)이 존재할 때만 '다시 만들기' 버튼을 보여줍니다.
+        // (공유받은 문제는 파일이 없으므로 버튼이 숨겨짐)
+        if (file != null && file.exists()) {
+            btnRegenerate.setVisibility(View.VISIBLE);
+        } else {
+            btnRegenerate.setVisibility(View.GONE);
+        }
+
         btnStartQuiz.setOnClickListener(v -> {
             if (questionList.isEmpty()) {
                 Toast.makeText(getContext(), "시작할 문제가 없습니다.", Toast.LENGTH_SHORT).show();
@@ -90,6 +104,8 @@ public class QuizSuccessFragment extends Fragment {
                 ((QuizActivity) getActivity()).showQuestionScreen(questionFragment);
             }
         });
+
+
 
         btnRegenerate.setOnClickListener(v -> {
             // "몇 문제 만드시겠습니까?" 안내창 띄우기

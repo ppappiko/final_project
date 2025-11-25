@@ -27,7 +27,8 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layout_comment_input">
+        android:layout_above="@id/layout_comment_input"
+        android:layout_below="@id/toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -39,10 +40,12 @@
                 android:id="@+id/detail_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="게시글 제목"
+                android:text="게시글 제목이 엄청 길어지면 이렇게 다음 줄로 넘어가서 모두 보여야 합니다."
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#000000"/>
+                android:textColor="#000000"
+
+                android:layout_marginBottom="12dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -70,6 +73,7 @@
                     android:layout_height="wrap_content"
                     android:text="날짜"
                     android:textColor="#888888"/>
+
             </LinearLayout>
 
             <TextView
@@ -106,6 +110,31 @@
                     android:textColor="#333333"
                     android:textStyle="bold"
                     android:textSize="14sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_quiz_download"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                android:padding="16dp"> <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📢 문제가 포함된 게시글입니다."
+                android:textStyle="bold"
+                android:textColor="#20C997"
+                android:layout_marginBottom="8dp"/>
+
+                <Button
+                    android:id="@+id/btn_download_quiz"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="내 보관함으로 문제 가져오기"
+                    android:backgroundTint="#20C997"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"/>
             </LinearLayout>
             <View
                 android:layout_width="match_parent"

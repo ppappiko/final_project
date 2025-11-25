@@ -25,8 +25,9 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail, etPassword;
-    private Button btnLogin, btnTest;
+    private Button btnLogin;
     private UserService userService;
+    private TextView tvFindAccount;
 
     private TextView btnToRegister; // 1. 회원가입 버튼 변수 선언
 
@@ -35,14 +36,22 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login); // activity_login.xml 레이아웃 사용
 
+        tvFindAccount = findViewById(R.id.tv_find_account);
+
         // 1. UI 요소 초기화
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
         btnToRegister = findViewById(R.id.btn_to_register); // 2. 회원가입 버튼 초기화)
 
+
         // 2. Retrofit 클라이언트를 통해 UserService 인터페이스 구현체 생성 (올바른 메소드 사용)
         userService = ApiClient.getUserService();
+
+        tvFindAccount.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, FindAccountActivity.class);
+            startActivity(intent);
+        });
 
         // 3. 로그인 버튼 클릭 리스너 설정
         btnLogin.setOnClickListener(v -> {

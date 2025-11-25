@@ -62,4 +62,11 @@ public interface ApiService {
             @Body PostRequest postRequest
     );
 
+    //문제 생성
+    @POST("/api/posts/{postId}/download")
+    Call<Void> downloadQuiz(
+            @Header("Authorization") String token,
+            @Path("postId") Long postId
+    );
+
 }
