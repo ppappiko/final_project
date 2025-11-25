@@ -39,12 +39,12 @@ public class PostDetailActivity extends AppCompatActivity {
     // 2. 댓글 관련 뷰들
     private RecyclerView rvComments;
     private EditText etComment;
-    private Button btnSend;
+    private Button btnSend, btnDownloadQuiz;
 
     // 3. 데이터
     private Post currentPost;
     private CommentAdapter commentAdapter;
-    private LinearLayout layoutAttachment; // 추가
+    private LinearLayout layoutAttachment, layoutQuizDownload; // 추가
     private TextView tvAttachmentName;
     private String myNickname = null;
 
@@ -70,6 +70,9 @@ public class PostDetailActivity extends AppCompatActivity {
         layoutAttachment = findViewById(R.id.layout_attachment);
         tvAttachmentName = findViewById(R.id.tv_attachment_name);
 
+        layoutQuizDownload = findViewById(R.id.layout_quiz_download);
+        btnDownloadQuiz = findViewById(R.id.btn_download_quiz);
+
 
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -79,7 +82,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
             // 3. 뒤로가기 버튼 및 제목 설정
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             }
         } else {
@@ -102,6 +105,7 @@ public class PostDetailActivity extends AppCompatActivity {
             }
 
             String fileName = currentPost.getAttachmentFileName();
+            String quizKey = currentPost.getAttachedQuizKey();
 
             if (fileName != null && !fileName.isEmpty()) {
                 // 파일이 있으면 보이게 설정
@@ -123,6 +127,16 @@ public class PostDetailActivity extends AppCompatActivity {
             } else {
                 // 파일 없으면 숨김
                 layoutAttachment.setVisibility(View.GONE);
+            }
+
+            if (quizKey != null && !quizKey.isEmpty()) {
+                // 공유된 문제가 있다면 버튼 보여주기
+                layoutQuizDownload.setVisibility(View.VISIBLE);
+
+                // 버튼 클릭 리스너
+                btnDownloadQuiz.setOnClickListener(v -> downloadSharedQuiz());
+            } else {
+                layoutQuizDownload.setVisibility(View.GONE);
             }
         } else {
             Toast.makeText(this, "게시글 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
@@ -289,7 +303,7 @@ public class PostDetailActivity extends AppCompatActivity {
         boolean isMyPost = (myNickname != null) && myNickname.equals(author);
 
         // ▼▼▼ [테스트용] 무조건 true로 설정해서 메뉴가 나오는지 확인하세요! ▼▼▼
-        isMyPost = true;
+        //isMyPost = true;
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         menu.findItem(R.id.action_edit).setVisible(isMyPost);
@@ -336,7 +350,19 @@ public class PostDetailActivity extends AppCompatActivity {
                     Toast.makeText(PostDetailActivity.this, "삭제되었습니다.", Toast.LENGTH_SHORT).show();
                     finish(); // 목록으로 돌아가기
                 } else {
-                    Toast.makeText(PostDetailActivity.this, "삭제 실패", Toast.LENGTH_SHORT).show();
+                    String errorMessage = "삭제 실패"; // 기본 메시지
+
+                    try {
+                        if (response.errorBody() != null) {
+                            // 서버가 보낸 "본인의 글만 삭제할 수 있습니다." 텍스트를 읽어옵니다.
+                            errorMessage = response.errorBody().string();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // 토스트로 띄우기
+                    Toast.makeText(PostDetailActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
@@ -344,5 +370,34 @@ public class PostDetailActivity extends AppCompatActivity {
                 Toast.makeText(PostDetailActivity.this, "오류 발생", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // 3. 문제 가져오기 요청 메서드
+    private void downloadSharedQuiz() {
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        String token = "Bearer " + prefs.getString("jwt_token", "");
+
+        ApiClient.getClient().create(ApiService.class)
+                .downloadQuiz(token, currentPost.getId())
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            // 성공 시 안내
+                            new AlertDialog.Builder(PostDetailActivity.this)
+                                    .setTitle("가져오기 성공")
+                                    .setMessage("문제가 내 보관함에 저장되었습니다.\n[문제 생성] 탭에서 확인하세요!")
+                                    .setPositiveButton("확인", null)
+                                    .show();
+                        } else {
+                            Toast.makeText(PostDetailActivity.this, "가져오기 실패: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(PostDetailActivity.this, "오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

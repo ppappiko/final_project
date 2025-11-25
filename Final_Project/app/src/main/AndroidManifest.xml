@@ -51,5 +51,7 @@
 
         <activity android:name=".User.EditProfileActivity" />
 
+        <activity android:name=".User.FindAccountActivity" />
+
     </application>
 </manifest>

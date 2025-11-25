@@ -180,7 +180,19 @@ public class CreatePostActivity extends AppCompatActivity {
                         Toast.makeText(CreatePostActivity.this, "수정되었습니다.", Toast.LENGTH_SHORT).show();
                         finish();
                     } else {
-                        Toast.makeText(CreatePostActivity.this, "수정 실패", Toast.LENGTH_SHORT).show();
+                        String errorMessage = "수정 실패"; // 기본 메시지
+
+                        try {
+                            if (response.errorBody() != null) {
+                                // 서버가 보낸 "본인의 글만 수정할 수 있습니다." 텍스트 읽기
+                                errorMessage = response.errorBody().string();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        // 토스트로 띄우기
+                        Toast.makeText(CreatePostActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 }
                 @Override

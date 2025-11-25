@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/white">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="계정 찾기"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="30dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="아이디 찾기 (이름 + 전화번호)"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:id="@+id/et_find_id_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="이름" />
+    <EditText
+        android:id="@+id/et_find_id_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:hint="전화번호" />
+
+    <Button
+        android:id="@+id/btn_find_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="아이디 찾기"
+        android:backgroundTint="#20C997"
+        android:textColor="@color/white"
+        android:layout_marginBottom="30dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#CCCCCC"
+        android:layout_marginBottom="30dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="비밀번호 재설정 (이메일 + 이름 + 전화번호)"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:id="@+id/et_find_pw_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="이메일 (아이디)" />
+    <EditText
+        android:id="@+id/et_find_pw_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="이름" />
+    <EditText
+        android:id="@+id/et_find_pw_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:hint="전화번호" />
+
+    <Button
+        android:id="@+id/btn_find_pw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#20C997"
+        android:textColor="@color/white"
+        android:text="임시 비밀번호 발급"/>
+
+</LinearLayout>

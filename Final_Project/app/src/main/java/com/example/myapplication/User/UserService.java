@@ -84,4 +84,12 @@ public interface UserService {
             @Header("Authorization") String token,
             @Body UserDto userDto
     );
+
+    // 아이디 찾기
+    @POST("/api/users/find-id")
+    Call<Map<String, String>> findId(@Body Map<String, String> request);
+
+    // 비밀번호 찾기
+    @POST("/api/users/find-password")
+    Call<Map<String, String>> findPassword(@Body Map<String, String> request);
 }
