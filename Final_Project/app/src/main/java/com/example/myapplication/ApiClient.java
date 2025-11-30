@@ -13,7 +13,7 @@ public class ApiClient {
 
     // ▼▼▼ (1. 여기에 서버 주소를 다시 적어주세요!) ▼▼▼
     // (안드로이드 에뮬레이터에서 로컬 서버 접속 시 10.0.2.2 사용)
-    private static final String BASE_URL = "http://222.114.74.161:8080/";
+    private static final String BASE_URL = "http://172.30.1.13:8080/";
 
     private static volatile Retrofit retrofit = null;
     private static ApiService apiService = null;

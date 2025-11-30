@@ -25,9 +25,9 @@ public class SttApiClient {
                     }
 
                     OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                            .connectTimeout(300, TimeUnit.SECONDS) // 타임아웃 5분으로 증가
-                            .writeTimeout(300, TimeUnit.SECONDS)   // 타임아웃 5분으로 증가
-                            .readTimeout(300, TimeUnit.SECONDS)    // 타임아웃 5분으로 증가
+                            .connectTimeout(1500, TimeUnit.SECONDS) // 타임아웃 5분으로 증가
+                            .writeTimeout(1500, TimeUnit.SECONDS)   // 타임아웃 5분으로 증가
+                            .readTimeout(1500, TimeUnit.SECONDS)    // 타임아웃 5분으로 증가
                             .addInterceptor(loggingInterceptor)
                             .build();
 
