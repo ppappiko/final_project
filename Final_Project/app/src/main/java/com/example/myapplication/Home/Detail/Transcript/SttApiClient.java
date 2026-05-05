@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SttApiClient {
 
-    private static final String STT_BASE_URL = "http://34.50.41.99:8000/";
+    private static final String STT_BASE_URL = "http://125.138.169.251:8000/";
     private static volatile Retrofit retrofit = null;
 
     public static Retrofit getClient() {
